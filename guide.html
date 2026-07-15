@@ -24,19 +24,23 @@
 
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
-    body { margin: 0; font-family: "Noto Sans Thai", sans-serif; color: var(--text); line-height: 1.65; background: linear-gradient(180deg, #eaf4f1, var(--bg) 360px); }
+    body { margin: 0; min-width: 320px; font-family: "Noto Sans Thai", sans-serif; color: var(--text); line-height: 1.65; background: linear-gradient(180deg, #eaf4f1, var(--bg) 360px); }
     a { color: var(--accent); }
     a:focus-visible { outline: 3px solid rgba(11, 115, 95, .22); outline-offset: 3px; }
+    .skip-link { position: fixed; z-index: 99; left: 12px; top: 8px; transform: translateY(-140%); padding: 9px 13px; border-radius: 10px; background: var(--text); color: #fff; }
+    .skip-link:focus { transform: translateY(0); }
 
     .topbar { position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(213, 228, 224, .9); background: rgba(255,255,255,.92); backdrop-filter: blur(12px); }
     .topbar-inner { width: min(1120px, calc(100% - 32px)); min-height: 64px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-    .brand { color: var(--text); text-decoration: none; font-weight: 700; }
+    .brand { display: flex; align-items: center; gap: 9px; color: var(--text); text-decoration: none; font-weight: 700; }
+    .brand-mark { display: grid; width: 36px; height: 36px; place-items: center; border-radius: 11px; background: var(--accent); color: #fff; font-size: .64rem; letter-spacing: .04em; }
     .nav { display: flex; gap: 8px; flex-wrap: wrap; }
-    .nav a { padding: 8px 12px; border-radius: 999px; color: var(--accent-strong); background: var(--surface-soft); text-decoration: none; font-size: .85rem; font-weight: 700; }
+    .nav a { display: inline-flex; min-height: 44px; align-items: center; padding: 8px 12px; border-radius: 10px; color: var(--accent-strong); background: var(--surface-soft); text-decoration: none; font-size: .85rem; font-weight: 700; }
 
     .page { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 46px 0 70px; }
     .hero { max-width: 790px; margin-bottom: 34px; }
     .eyebrow { margin: 0 0 8px; color: var(--accent); font-size: .82rem; font-weight: 700; letter-spacing: .04em; }
+    .guide-badge { display: inline-flex; margin-bottom: 12px; padding: 5px 9px; border: 1px solid #c4dfd8; border-radius: 999px; background: rgba(255,255,255,.72); color: var(--accent-strong); font-size: .75rem; font-weight: 700; }
     h1 { margin: 0; font-size: clamp(2.1rem, 7vw, 4rem); line-height: 1.12; letter-spacing: -.04em; }
     .hero > p:last-child { margin: 16px 0 0; color: var(--muted); font-size: 1.05rem; }
 
@@ -44,10 +48,10 @@
     .toc, .card { border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow); }
     .toc { align-self: start; padding: 18px; border-radius: 18px; }
     .toc strong { display: block; margin-bottom: 9px; }
-    .toc a { display: block; padding: 7px 0; color: var(--muted); text-decoration: none; font-size: .9rem; }
+    .toc a { display: flex; min-height: 40px; align-items: center; padding: 7px 0; color: var(--muted); text-decoration: none; font-size: .9rem; }
     .toc a:hover { color: var(--accent); }
     .content { display: grid; gap: 18px; }
-    .card { padding: clamp(20px, 4vw, 32px); border-radius: 22px; }
+    .card { padding: clamp(20px, 4vw, 32px); border-radius: 22px; scroll-margin-top: 86px; }
     .card h2 { margin: 0 0 8px; font-size: 1.55rem; }
     .card h3 { margin: 24px 0 7px; font-size: 1.05rem; }
     .card p { margin: 8px 0; color: var(--muted); }
@@ -56,13 +60,13 @@
     .steps li::before { content: counter(step); display: grid; width: 32px; height: 32px; place-items: center; border-radius: 10px; color: #fff; background: var(--accent); font-size: .78rem; font-weight: 700; }
     .note { margin-top: 18px; padding: 14px 16px; border-left: 4px solid var(--accent); border-radius: 10px; background: var(--surface-soft); color: var(--accent-strong); }
     .warning { border-left-color: #c78916; background: #fff8e8; color: var(--warning); }
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: .9rem; }
+    .table-wrap { max-width: 100%; overflow-x: auto; border-radius: 10px; }
+    table { width: 100%; min-width: 520px; border-collapse: collapse; margin-top: 14px; font-size: .9rem; }
     th, td { padding: 11px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
     th { color: var(--accent-strong); background: var(--surface-soft); }
     .cta { margin-top: 24px; padding: 28px; border-radius: 22px; background: var(--text); color: #fff; text-align: center; }
     .cta p { color: #c8d8d4; }
-    .cta a { display: inline-flex; padding: 10px 16px; margin: 4px; border-radius: 12px; background: #fff; color: var(--accent-strong); text-decoration: none; font-weight: 700; }
+    .cta a { display: inline-flex; min-height: 44px; align-items: center; padding: 10px 16px; margin: 4px; border-radius: 12px; background: #fff; color: var(--accent-strong); text-decoration: none; font-weight: 700; }
 
     @media (min-width: 880px) {
       .layout { grid-template-columns: 230px 1fr; align-items: start; }
@@ -74,22 +78,29 @@
       .nav { width: 100%; }
       .nav a { flex: 1; text-align: center; }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; }
+    }
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#mainContent">ข้ามไปยังเนื้อหาหลัก</a>
   <header class="topbar">
     <div class="topbar-inner">
-      <a class="brand" href="./">PICMHS2 · คู่มือการใช้งาน</a>
+      <a class="brand" href="./"><span class="brand-mark">PIC</span><span>PICMHS2 · คู่มือการใช้งาน</span></a>
       <nav class="nav" aria-label="ทางลัด">
-        <a href="./">Uploader</a>
+        <a href="./">สำหรับผู้อัปโหลด</a>
         <a href="./public/">ค้นหารูปสาธารณะ</a>
       </nav>
     </div>
   </header>
 
-  <main class="page">
+  <main class="page" id="mainContent">
     <section class="hero">
-      <p class="eyebrow">PICMHS2 USER GUIDE</p>
+      <span class="guide-badge">คู่มือสำหรับผู้ค้นหารูป ผู้อัปโหลด และผู้ดูแลระบบ</span>
+      <p class="eyebrow">คู่มือการใช้งาน PICMHS2</p>
       <h1>จัดเก็บและค้นหารูปกิจกรรมอย่างเป็นระบบ</h1>
       <p>คู่มือนี้อธิบายการค้นหารูป การสร้างกิจกรรมใหม่ การอัปโหลดเพิ่ม และขอบเขตของข้อมูลที่ระบบดูแล</p>
     </section>
@@ -98,11 +109,11 @@
       <aside class="toc" aria-label="สารบัญ">
         <strong>สารบัญ</strong>
         <a href="#public-search">ค้นหารูปสำหรับบุคคลทั่วไป</a>
-        <a href="#login">เข้าสู่ระบบ uploader</a>
+        <a href="#login">เข้าสู่ระบบสำหรับผู้อัปโหลด</a>
         <a href="#new-activity">สร้างกิจกรรมใหม่</a>
         <a href="#append">อัปโหลดเพิ่ม</a>
-        <a href="#user-admin">จัดการ uploader สำหรับ Admin</a>
-        <a href="#manual-policy">กติกา manual upload</a>
+        <a href="#user-admin">จัดการผู้อัปโหลดสำหรับผู้ดูแลระบบ</a>
+        <a href="#manual-policy">กติกาการจัดการไฟล์โดยตรง</a>
         <a href="#troubleshooting">แก้ปัญหาเบื้องต้น</a>
       </aside>
 
@@ -117,18 +128,18 @@
             <li><div>กด <strong>ค้นหา</strong> และเลือกกิจกรรมจากผลลัพธ์</div></li>
             <li><div>กด <strong>เปิดโฟลเดอร์รูป</strong> เพื่อดูหรือดาวน์โหลดผ่าน Google Drive</div></li>
           </ol>
-          <div class="note">จำนวนไฟล์ที่แสดงเป็นจำนวนโดยประมาณจาก metadata ไม่ใช่การนับไฟล์สดจาก Drive</div>
+          <div class="note">จำนวนไฟล์ที่แสดงเป็นจำนวนโดยประมาณจากข้อมูลกิจกรรม ไม่ใช่การนับไฟล์สดจาก Google Drive</div>
         </section>
 
         <section class="card" id="login">
-          <h2>เข้าสู่ระบบ uploader</h2>
+          <h2>เข้าสู่ระบบสำหรับผู้อัปโหลด</h2>
           <ol class="steps">
             <li><div>เปิด <a href="./">เว็บไซต์หลัก</a></div></li>
             <li><div>กด Google Sign-In และเลือกบัญชีที่ได้รับอนุญาต</div></li>
             <li><div>อนุญาตสิทธิ์ Google Drive เมื่อระบบถาม</div></li>
-            <li><div>เมื่อผ่าน allowlist และ Drive permission ระบบจะแสดงหน้าจัดการกิจกรรม</div></li>
+            <li><div>เมื่อผ่านรายชื่อผู้ได้รับอนุญาตและสิทธิ์ Google Drive ระบบจะแสดงหน้าจัดการกิจกรรม</div></li>
           </ol>
-          <div class="warning note">ผู้ที่มีหน้าที่ค้นหาอย่างเดียวไม่ควรได้รับ Editor permission ให้ใช้หน้า Public Search แทน</div>
+          <div class="warning note">ผู้ที่มีหน้าที่ค้นหาอย่างเดียวไม่ควรได้รับสิทธิ์ Editor ให้ใช้หน้าค้นหารูปสาธารณะแทน</div>
         </section>
 
         <section class="card" id="new-activity">
@@ -138,51 +149,51 @@
             <li><div>เลือกชื่อสำเร็จรูปหรือพิมพ์ชื่อกิจกรรมเอง</div></li>
             <li><div>เลือกรูปหรือวิดีโอและตรวจรายการไฟล์</div></li>
             <li><div>กด <strong>อัปโหลดกิจกรรมใหม่</strong></div></li>
-            <li><div>รอจนสร้างโฟลเดอร์ อัปโหลดไฟล์ และบันทึก metadata สำเร็จครบทุกขั้น</div></li>
+            <li><div>รอจนสร้างโฟลเดอร์ อัปโหลดไฟล์ และบันทึกข้อมูลกิจกรรมสำเร็จครบทุกขั้น</div></li>
           </ol>
-          <div class="note">อย่าปิด browser ระหว่างอัปโหลด และอย่าสร้างโฟลเดอร์กิจกรรมซ้ำเองใน Drive</div>
+          <div class="note">อย่าปิดหน้าเว็บระหว่างอัปโหลด และอย่าสร้างโฟลเดอร์กิจกรรมซ้ำเองใน Google Drive</div>
         </section>
 
         <section class="card" id="append">
           <h2>ค้นหาและอัปโหลดเพิ่ม</h2>
           <ol class="steps">
-            <li><div>เปิดแท็บค้นหาในระบบ uploader</div></li>
+            <li><div>เปิดแท็บค้นหาในระบบผู้อัปโหลด</div></li>
             <li><div>ค้นหาและเลือกกิจกรรมเดิม</div></li>
             <li><div>เลือกไฟล์ที่ต้องการเพิ่ม</div></li>
-            <li><div>กด <strong>อัปโหลดเพิ่ม</strong> และรอจน metadata อัปเดต</div></li>
+            <li><div>กด <strong>อัปโหลดเพิ่ม</strong> และรอจนข้อมูลกิจกรรมอัปเดต</div></li>
           </ol>
           <p>การใช้ flow นี้ทำให้จำนวนไฟล์และเวลาแก้ไขล่าสุดอัปเดตตามระบบ</p>
         </section>
 
         <section class="card" id="user-admin">
-          <h2>จัดการ uploader สำหรับ Admin</h2>
-          <p>เมนูนี้แสดงเฉพาะผู้ดูแลที่กำหนดไว้ใน backend ผู้ที่เพิ่มใหม่จะเป็น uploader และไม่มีสิทธิ์เพิ่มผู้ใช้อื่น</p>
+          <h2>จัดการผู้อัปโหลดสำหรับผู้ดูแลระบบ</h2>
+          <p>เมนูนี้แสดงเฉพาะผู้ดูแลที่กำหนดไว้ในระบบหลังบ้าน ผู้ที่เพิ่มใหม่จะเป็นผู้อัปโหลดและไม่มีสิทธิ์เพิ่มผู้ใช้อื่น</p>
           <ol class="steps">
-            <li><div>เปิดแท็บ <strong>จัดการ uploader</strong></div></li>
+            <li><div>เปิดแท็บ <strong>จัดการผู้อัปโหลด</strong></div></li>
             <li><div>กรอกอีเมล ชื่อที่แสดง และหมายเหตุ เช่น ฝ่ายหรือหน้าที่</div></li>
-            <li><div>กด <strong>บันทึก uploader</strong></div></li>
+            <li><div>กด <strong>บันทึกผู้อัปโหลด</strong></div></li>
             <li><div>เพิ่มอีเมลเดียวกันเป็น Editor บน Drive root ด้วยตนเอง</div></li>
             <li><div>ใช้ <strong>ปิดสิทธิ์</strong> เพื่อระงับการใช้งานโดยไม่ลบข้อมูล</div></li>
             <li><div>ใช้ <strong>เปิดสิทธิ์</strong> เมื่อต้องการให้กลับมาใช้งาน</div></li>
           </ol>
-          <div class="note">ช่อง notes เป็นคำอธิบาย ไม่ใช่ role ของระบบ Admin ถูกกำหนดจาก backend เท่านั้น ระบบไม่เพิ่มหรือลบ Drive Editor permission อัตโนมัติ</div>
+          <div class="note">ช่องหมายเหตุเป็นคำอธิบาย ไม่ใช่บทบาทของระบบ ผู้ดูแลถูกกำหนดจากระบบหลังบ้านเท่านั้น และระบบจะไม่เพิ่มหรือลบสิทธิ์ Editor ใน Google Drive อัตโนมัติ</div>
         </section>
 
         <section class="card" id="manual-policy">
-          <h2>กติกา manual upload</h2>
-          <p>ระบบค้นหาจาก Google Sheets metadata และไม่สแกน Drive อัตโนมัติ</p>
+          <h2>กติกาการจัดการไฟล์โดยตรง</h2>
+          <p>ระบบค้นหาจากข้อมูลกิจกรรมใน Google ชีต และไม่สแกน Google Drive อัตโนมัติ</p>
           <div class="table-wrap">
             <table>
               <thead><tr><th>การกระทำใน Drive</th><th>ผลในระบบ</th></tr></thead>
               <tbody>
                 <tr><td>เพิ่มไฟล์ในกิจกรรมเดิม</td><td>เปิด Drive แล้วเห็นไฟล์ แต่จำนวนไฟล์อาจไม่เพิ่ม</td></tr>
-                <tr><td>สร้างโฟลเดอร์กิจกรรมเอง</td><td>ค้นหาไม่เจอ เพราะไม่มี metadata</td></tr>
+                <tr><td>สร้างโฟลเดอร์กิจกรรมเอง</td><td>ค้นหาไม่เจอ เพราะไม่มีข้อมูลกิจกรรมในระบบ</td></tr>
                 <tr><td>เปลี่ยนชื่อหรือย้ายโฟลเดอร์</td><td>ชื่อ หมวด หรือ path ในผลค้นหาอาจไม่ตรง</td></tr>
                 <tr><td>ลบโฟลเดอร์</td><td>ผลค้นหาอาจยังอยู่ แต่ลิงก์เปิดไม่ได้</td></tr>
               </tbody>
             </table>
           </div>
-          <div class="warning note">กิจกรรมที่ต้องการให้ระบบดูแลต้องสร้างและเพิ่มไฟล์ผ่าน PICMHS2 ข้อมูล manual ถือว่าอยู่นอกการรับประกันของระบบ</div>
+          <div class="warning note">กิจกรรมที่ต้องการให้ระบบดูแลต้องสร้างและเพิ่มไฟล์ผ่าน PICMHS2 การจัดการไฟล์โดยตรงถือว่าอยู่นอกการรับประกันของระบบ</div>
         </section>
 
         <section class="card" id="troubleshooting">
@@ -192,9 +203,9 @@
               <thead><tr><th>อาการ</th><th>แนวทางตรวจสอบ</th></tr></thead>
               <tbody>
                 <tr><td>ค้นหาไม่พบ</td><td>ลดตัวกรอง ตรวจชื่อกิจกรรม และยืนยันว่ากิจกรรมสร้างผ่านระบบ</td></tr>
-                <tr><td>เปิดโฟลเดอร์ไม่ได้</td><td>แจ้ง admin ตรวจ Drive sharing และ child limited access</td></tr>
-                <tr><td>Login ไม่ได้</td><td>ตรวจว่าใช้อีเมลที่อยู่ใน allowlist และได้รับ Drive Editor permission</td></tr>
-                <tr><td>อัปโหลดไม่ได้</td><td>ลอง Login ใหม่ ตรวจ internet และอย่าปิด browser ระหว่างทำงาน</td></tr>
+                <tr><td>เปิดโฟลเดอร์ไม่ได้</td><td>แจ้งผู้ดูแลตรวจการแชร์ Google Drive และข้อจำกัดการเข้าถึงของโฟลเดอร์ย่อย</td></tr>
+                <tr><td>เข้าสู่ระบบไม่ได้</td><td>ตรวจว่าใช้อีเมลที่อยู่ในรายชื่อผู้ได้รับอนุญาต และได้รับสิทธิ์ Editor ใน Google Drive</td></tr>
+                <tr><td>อัปโหลดไม่ได้</td><td>ลองเข้าสู่ระบบใหม่ ตรวจการเชื่อมต่ออินเทอร์เน็ต และอย่าปิดหน้าเว็บระหว่างทำงาน</td></tr>
                 <tr><td>จำนวนไฟล์ไม่ตรง</td><td>มีการเพิ่มหรือลบไฟล์ผ่าน Drive โดยตรง ระบบไม่ sync อัตโนมัติ</td></tr>
                 <tr><td>ค้นหาช้าเป็นบางครั้ง</td><td>Apps Script อาจเริ่มระบบใหม่ กรุณารอสักครู่แล้วลองอีกครั้ง</td></tr>
               </tbody>
@@ -207,7 +218,7 @@
     <section class="cta">
       <h2>พร้อมใช้งาน</h2>
       <p>เลือกหน้าที่ตรงกับสิทธิ์ของคุณ</p>
-      <a href="./">เข้าสู่ระบบ uploader</a>
+      <a href="./">เข้าสู่ระบบสำหรับผู้อัปโหลด</a>
       <a href="./public/">ค้นหารูปสาธารณะ</a>
       <a href="https://github.com/RobbyGrean/picturemhs2#readme" target="_blank" rel="noopener noreferrer">คู่มือสร้างระบบของคุณเอง</a>
     </section>

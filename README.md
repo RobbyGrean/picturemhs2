@@ -471,6 +471,20 @@ Functional MVP ที่ยืนยันแล้ว:
 5. เพิ่ม `public_visibility` และ public root แยก หากต้องรองรับข้อมูลผสม public/private
 6. เพิ่ม file-level metadata เฉพาะเมื่อจำเป็นต้องมี gallery หรือ download รายไฟล์
 
+## 3.13 UI/UX design system
+
+ทุกหน้าของระบบใช้ visual language เดียวกันแบบ modern institutional โดยคงเป็น static HTML/CSS/JavaScript:
+
+- สีหลัก `#0b735f` และสีเข้ม `#075949`
+- พื้นหลัง mint/neutral อ่อน, surface สีขาว และข้อความเขียว-charcoal
+- Noto Sans Thai พร้อมระยะบรรทัดสำหรับข้อความภาษาไทย
+- ช่องกรอกและปุ่มมี touch target อย่างน้อยประมาณ 44px
+- card radius ระดับกลาง, border บาง และ shadow เบาเฉพาะจุดที่ต้องการลำดับชั้น
+- focus ring 3px, status แยก info/success/warning/error ด้วยข้อความและสัญลักษณ์ ไม่ใช้สีเพียงอย่างเดียว
+- mobile-first ตั้งแต่ 320px, รองรับ zoom 200% และ `prefers-reduced-motion`
+
+Component หลักที่ใช้ร่วมกัน ได้แก่ header/navigation, button, form field, tabs, panel/card, status banner, file item, result card, user card, empty state และ progress dialog
+
 ---
 
 ## License และการนำไปใช้

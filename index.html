@@ -20,6 +20,9 @@
   --accent-strong: #075949;
   --accent-soft: #e6f4f0;
   --success: #147a45;
+  --warning: #8a5a00;
+  --warning-soft: #fff8e8;
+  --info: #245a85;
   --danger: #b4233a;
   --shadow: 0 12px 32px rgba(21, 55, 47, 0.08);
   --radius: 18px;
@@ -101,6 +104,9 @@ button, select { cursor: pointer; }
 .hero-points { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 24px 0 0; padding: 0; list-style: none; }
 .hero-points li { display: flex; align-items: center; gap: 7px; color: #4d6962; font-size: 13px; }
 .hero-points li::before { content: "✓"; display: grid; width: 20px; height: 20px; place-items: center; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 700; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 24px; }
+.hero-link { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 9px 14px; border: 1px solid var(--border-strong); border-radius: 11px; color: var(--accent-strong); background: rgba(255,255,255,.78); text-decoration: none; font-size: 13px; font-weight: 700; }
+.hero-link.primary { border-color: var(--accent); background: var(--accent); color: #fff; }
 
 .login-card {
   position: relative;
@@ -142,6 +148,14 @@ button, select { cursor: pointer; }
 .feature-card h3 { margin: 0 0 6px; font-size: 18px; }
 .feature-card p { margin: 0; color: var(--muted); font-size: 13px; }
 
+.permission-grid { display: grid; gap: 12px; }
+.permission-card { padding: 20px; border: 1px solid var(--border); border-radius: 18px; background: rgba(255,255,255,.78); }
+.permission-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.permission-badge { display: grid; width: 34px; height: 34px; place-items: center; flex: 0 0 34px; border-radius: 10px; background: var(--accent-soft); color: var(--accent-strong); font-size: 12px; font-weight: 700; }
+.permission-card h3 { margin: 0; font-size: 17px; }
+.permission-card p { margin: 0; color: var(--muted); font-size: 13px; }
+.permission-card a { display: inline-flex; min-height: 44px; align-items: center; margin-top: 9px; color: var(--accent-strong); font-size: 13px; font-weight: 700; }
+
 .steps-grid { display: grid; gap: 12px; counter-reset: steps; }
 .step-card { counter-increment: steps; display: grid; grid-template-columns: 50px 1fr; gap: 15px; align-items: start; padding: 18px; border-radius: 17px; background: rgba(255,255,255,.68); border: 1px solid rgba(189,207,202,.8); }
 .step-card::before { content: "0" counter(steps); display: grid; width: 50px; height: 50px; place-items: center; border-radius: 14px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; }
@@ -156,6 +170,8 @@ button, select { cursor: pointer; }
 .cta-card h2 { position: relative; margin: 0; font-size: clamp(27px, 6vw, 40px); }
 .cta-card p { position: relative; margin: 10px auto 22px; max-width: 560px; color: #b8cbc6; }
 .cta-button { position: relative; display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 10px 19px; border-radius: 12px; background: #fff; color: var(--accent-strong); text-decoration: none; font-weight: 700; }
+.cta-button + .cta-button { margin-left: 6px; }
+.cta-button.secondary { border: 1px solid rgba(255,255,255,.3); background: transparent; color: #fff; }
 .landing-footer { padding: 0 0 28px; text-align: center; color: var(--muted); font-size: 11px; }
 .landing-footer a { color: var(--accent-strong); font-weight: 700; }
 
@@ -176,6 +192,10 @@ button, select { cursor: pointer; }
 
 .brand { font-weight: 700; font-size: 20px; line-height: 1.2; }
 .brand small { display: block; margin-top: 2px; font-size: 11px; font-weight: 500; color: var(--muted); }
+.topbar-actions { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.app-links { display: none; align-items: center; gap: 4px; }
+.app-links a { min-height: 40px; display: inline-flex; align-items: center; padding: 7px 10px; border-radius: 9px; color: var(--muted); text-decoration: none; font-size: 12px; font-weight: 600; }
+.app-links a:hover { color: var(--accent-strong); background: var(--accent-soft); }
 .userbox { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .username { display: none; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -211,7 +231,7 @@ button, select { cursor: pointer; }
 .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
 .btn-primary:hover:not(:disabled) { background: var(--accent-strong); border-color: var(--accent-strong); }
 .btn-secondary:hover { border-color: var(--border-strong); background: var(--surface-2); }
-.btn:focus-visible, .tab-btn:focus-visible, input:focus-visible, select:focus-visible, .dropzone:focus-within { outline: 3px solid rgba(11, 115, 95, .22); outline-offset: 2px; }
+.btn:focus-visible, .tab-btn:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible, .dropzone:focus-within { outline: 3px solid rgba(11, 115, 95, .28); outline-offset: 2px; }
 .btn:disabled { cursor: not-allowed; opacity: .48; }
 
 .grid { display: grid; gap: 14px; }
@@ -285,9 +305,22 @@ button, select { cursor: pointer; }
 
 .status { display: none; border-radius: 12px; padding: 10px 12px; font-size: 13px; }
 .status.show { display: block; }
-.status.info { background: #edf5ff; border: 1px solid #bed8f4; color: #245a85; }
+.status.show::before { display: inline-block; margin-right: 7px; font-weight: 700; }
+.status.info { background: #edf5ff; border: 1px solid #bed8f4; color: var(--info); }
+.status.info::before { content: "ℹ"; }
 .status.success { background: #ecf8f1; border: 1px solid #b7e1c8; color: var(--success); }
+.status.success::before { content: "✓"; }
+.status.warning { background: var(--warning-soft); border: 1px solid #efd499; color: var(--warning); }
+.status.warning::before { content: "!"; }
 .status.error { background: #fff0f2; border: 1px solid #fac0ca; color: var(--danger); }
+.status.error::before { content: "×"; }
+
+.empty-state { padding: 20px; text-align: center; border: 1px dashed var(--border-strong); border-radius: 14px; background: var(--surface-2); color: var(--muted); font-size: 13px; }
+.empty-state strong { display: block; margin-bottom: 3px; color: var(--text); font-size: 14px; }
+.selected-summary { display: grid; gap: 5px; padding: 12px; border: 1px solid #9dcfc1; border-radius: 13px; background: var(--accent-soft); }
+.selected-summary[hidden] { display: none; }
+.selected-summary strong { color: var(--accent-strong); font-size: 13px; }
+.selected-summary span { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
 
 .notice-panel { box-shadow: none; background: #f8fbfa; }
 .notice-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
@@ -312,10 +345,14 @@ button, select { cursor: pointer; }
 .user-card-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .user-role { padding: 3px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-strong); font-size: 11px; font-weight: 700; }
 .user-role.inactive { background: #fff0f2; color: var(--danger); }
+.user-group + .user-group { margin-top: 16px; }
+.user-group-title { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 8px; font-size: 14px; }
+.user-group-count { color: var(--muted); font-size: 11px; font-weight: 500; }
+.admin-warning { margin-bottom: 14px; }
 
 .overlay { position: fixed; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(13, 42, 35, .56); }
 .overlay.show { display: flex; }
-.overlay-card { width: min(400px, 100%); padding: 22px; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); }
+.overlay-card { width: min(400px, 100%); padding: 22px; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); outline: none; }
 .overlay-card h3 { margin: 0 0 6px; }
 .progress { height: 8px; margin-top: 14px; overflow: hidden; border-radius: 999px; background: var(--accent-soft); }
 .progress-fill { height: 100%; width: 0%; background: var(--accent); transition: width .2s ease; }
@@ -324,12 +361,14 @@ button, select { cursor: pointer; }
   .landing-wrap { width: min(1160px, calc(100% - 48px)); }
   .landing-nav { min-height: 78px; }
   .feature-grid { grid-template-columns: repeat(3, 1fr); }
+  .permission-grid { grid-template-columns: repeat(3, 1fr); }
   .steps-grid { grid-template-columns: repeat(3, 1fr); }
   .step-card { display: block; padding: 22px; }
   .step-card::before { margin-bottom: 25px; }
   .cta-card { padding: 54px 34px; }
   .container { padding: 22px 20px 40px; }
   .username { display: block; max-width: 250px; }
+  .tabs { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
   .date-grid { grid-template-columns: repeat(3, 1fr); }
   .date-grid .field:last-child { grid-column: auto; }
   .activity-row { grid-template-columns: .9fr 1.4fr; }
@@ -347,6 +386,7 @@ button, select { cursor: pointer; }
   .floating-card { display: block; }
   .landing-section { padding: 92px 0; }
   .topbar { padding: 10px 24px; }
+  .app-links { display: flex; }
   .hero { margin-bottom: 18px; }
   .tabs { width: max-content; min-width: 440px; }
   .grid { grid-template-columns: minmax(0, 1.65fr) minmax(280px, .8fr); gap: 16px; align-items: start; }
@@ -383,6 +423,7 @@ button, select { cursor: pointer; }
       </a>
       <div class="landing-links">
         <a href="./guide.html">คู่มือ</a>
+        <a href="./public/">ค้นหารูปสาธารณะ</a>
         <a href="#จุดเด่น">จุดเด่น</a>
         <a href="#วิธีใช้งาน">วิธีใช้งาน</a>
         <a href="#เข้าสู่ระบบ">สำหรับผู้ใช้งาน</a>
@@ -400,6 +441,10 @@ button, select { cursor: pointer; }
           <li>ค้นหาด้วยวันที่และชื่อกิจกรรม</li>
           <li>เก็บไฟล์ในพื้นที่ขององค์กร</li>
         </ul>
+        <div class="hero-actions">
+          <a class="hero-link primary" href="./public/">ค้นหารูปสาธารณะ</a>
+          <a class="hero-link" href="./guide.html">อ่านคู่มือการใช้งาน</a>
+        </div>
       </div>
 
       <div class="hero-visual" id="เข้าสู่ระบบ">
@@ -443,7 +488,34 @@ button, select { cursor: pointer; }
       </div>
     </section>
 
-    <section class="landing-section alt" id="วิธีใช้งาน">
+    <section class="landing-section alt" id="สิทธิ์การใช้งาน">
+      <div class="landing-wrap">
+        <div class="section-heading center">
+          <p class="section-label">สิทธิ์ที่เหมาะกับหน้าที่</p>
+          <h2>ค้นหา อัปโหลด และดูแลระบบ แยกออกจากกันชัดเจน</h2>
+          <p>แต่ละคนเห็นเฉพาะเครื่องมือที่จำเป็น ช่วยลดความเสี่ยงจากการให้สิทธิ์มากเกินไป</p>
+        </div>
+        <div class="permission-grid">
+          <article class="permission-card">
+            <div class="permission-card-header"><span class="permission-badge">ดู</span><h3>ผู้ค้นหารูปทั่วไป</h3></div>
+            <p>ไม่ต้องเข้าสู่ระบบ ค้นหาเฉพาะกิจกรรมที่องค์กรอนุญาตให้เผยแพร่ และเปิดโฟลเดอร์แบบอ่านอย่างเดียว</p>
+            <a href="./public/">ไปหน้าค้นหารูปสาธารณะ</a>
+          </article>
+          <article class="permission-card">
+            <div class="permission-card-header"><span class="permission-badge">อัป</span><h3>ผู้อัปโหลด</h3></div>
+            <p>เข้าสู่ระบบด้วยบัญชีที่ได้รับอนุญาต สร้างกิจกรรม อัปโหลด ค้นหา และเพิ่มไฟล์ในกิจกรรมเดิม</p>
+            <a href="#เข้าสู่ระบบ">เข้าสู่ระบบสำหรับผู้อัปโหลด</a>
+          </article>
+          <article class="permission-card">
+            <div class="permission-card-header"><span class="permission-badge">ดูแล</span><h3>ผู้ดูแลระบบ</h3></div>
+            <p>จัดการรายชื่อผู้อัปโหลดในระบบ ส่วนสิทธิ์แก้ไข Google Drive ต้องกำหนดด้วยตนเองตามนโยบายองค์กร</p>
+            <a href="./guide.html#user-admin">อ่านคู่มือผู้ดูแลระบบ</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section" id="วิธีใช้งาน">
       <div class="landing-wrap">
         <div class="section-heading center">
           <p class="section-label">สามขั้นตอน</p>
@@ -470,6 +542,7 @@ button, select { cursor: pointer; }
           <h2>พร้อมจัดระเบียบภาพกิจกรรมแล้วหรือยัง?</h2>
           <p>เข้าสู่ระบบเพื่อสร้างกิจกรรมใหม่ ค้นหาภาพเดิม หรือเพิ่มไฟล์เข้าคลังขององค์กร</p>
           <a class="cta-button" href="#เข้าสู่ระบบ">เข้าสู่ระบบเพื่อเริ่มใช้งาน</a>
+          <a class="cta-button secondary" href="./public/">ค้นหารูปโดยไม่เข้าสู่ระบบ</a>
         </div>
       </div>
     </section>
@@ -483,9 +556,15 @@ button, select { cursor: pointer; }
         PICMHS2
         <small>คลังภาพกิจกรรมสำนักงาน</small>
       </div>
-      <div class="userbox">
-        <div class="username" id="userText">-</div>
-        <button class="btn btn-secondary" id="btnLogout">ออกจากระบบ</button>
+      <div class="topbar-actions">
+        <nav class="app-links" aria-label="ทางลัด">
+          <a href="./public/" target="_blank" rel="noopener noreferrer">ค้นหารูปสาธารณะ</a>
+          <a href="./guide.html" target="_blank" rel="noopener noreferrer">คู่มือ</a>
+        </nav>
+        <div class="userbox">
+          <div class="username" id="userText">-</div>
+          <button class="btn btn-secondary" id="btnLogout">ออกจากระบบ</button>
+        </div>
       </div>
     </header>
 
@@ -495,13 +574,13 @@ button, select { cursor: pointer; }
         <p>สร้างกิจกรรมใหม่ หรือค้นหากิจกรรมเดิมเพื่อเพิ่มไฟล์</p>
       </div>
 
-      <div class="tabs">
-        <button class="tab-btn active" data-tab="upload">อัปโหลดใหม่</button>
-        <button class="tab-btn" data-tab="search">ค้นหา / อัปโหลดเพิ่ม</button>
-        <button class="tab-btn hidden" id="adminTabButton" data-tab="users">จัดการ uploader</button>
+      <div class="tabs" role="tablist" aria-label="พื้นที่การทำงาน">
+        <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-upload" data-tab="upload">อัปโหลดใหม่</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-search" data-tab="search">ค้นหา / อัปโหลดเพิ่ม</button>
+        <button class="tab-btn hidden" role="tab" aria-selected="false" aria-controls="tab-users" id="adminTabButton" data-tab="users">จัดการผู้อัปโหลด</button>
       </div>
 
-      <section id="tab-upload">
+      <section id="tab-upload" role="tabpanel">
         <div class="grid">
           <div class="panel">
             <div class="panel-head">
@@ -584,13 +663,13 @@ button, select { cursor: pointer; }
             <ul class="notice-list">
               <li>เลือกวันที่และชื่อกิจกรรมให้ตรงกับงาน</li>
               <li>เพิ่มไฟล์เข้ากิจกรรมเดิมได้จากแท็บค้นหา</li>
-              <li>การแก้ชื่อ ย้าย หรือลบไฟล์ ให้จัดการใน Google Drive และ Google ชีต</li>
+              <li>การแก้ชื่อ ย้าย หรือลบไฟล์ใน Google Drive โดยตรงอยู่นอกการรับประกันของระบบ และข้อมูลค้นหาอาจไม่ตรง</li>
             </ul>
           </div>
         </div>
       </section>
 
-      <section id="tab-search" class="hidden">
+      <section id="tab-search" class="hidden" role="tabpanel">
         <div class="grid">
           <div class="panel">
             <div class="panel-head">
@@ -636,7 +715,9 @@ button, select { cursor: pointer; }
                 </div>
               </div>
 
-              <div class="search-results" id="searchResults"></div>
+              <div class="search-results" id="searchResults">
+                <div class="empty-state"><strong>เริ่มค้นหากิจกรรม</strong>เลือกตัวกรองเท่าที่ทราบ หรือกดค้นหาเพื่อดูรายการทั้งหมด</div>
+              </div>
             </div>
           </div>
 
@@ -650,6 +731,10 @@ button, select { cursor: pointer; }
             </div>
             <div class="stack">
               <div id="appendStatus" class="status" role="status" aria-live="polite"></div>
+              <div class="selected-summary" id="appendSelectedSummary" hidden>
+                <strong id="appendSelectedName">กิจกรรมที่เลือก</strong>
+                <span id="appendSelectedMeta"></span>
+              </div>
               <div class="field">
                 <label for="appendTarget">กิจกรรมที่เลือก</label>
                 <input id="appendTarget" type="text" readonly placeholder="ยังไม่ได้เลือกกิจกรรม">
@@ -673,14 +758,14 @@ button, select { cursor: pointer; }
         </div>
       </section>
 
-      <section id="tab-users" class="hidden">
+      <section id="tab-users" class="hidden" role="tabpanel">
         <div class="admin-grid">
           <div class="panel">
             <div class="panel-head">
               <span class="step-number">+</span>
               <div>
-                <h3>เพิ่มหรือแก้ไข uploader</h3>
-                <p class="panel-subtitle">ผู้ที่เพิ่มใหม่จะเป็น uploader และไม่มีสิทธิ์จัดการผู้ใช้งาน</p>
+                <h3>เพิ่มหรือแก้ไขผู้อัปโหลด</h3>
+                <p class="panel-subtitle">ผู้ใช้ใหม่เป็นผู้อัปโหลดเสมอ และไม่มีสิทธิ์จัดการผู้ใช้งาน</p>
               </div>
             </div>
             <div class="stack">
@@ -698,13 +783,14 @@ button, select { cursor: pointer; }
                 <input id="allowedUserNotes" type="text" maxlength="200" autocomplete="off" placeholder="เช่น ฝ่ายประชาสัมพันธ์">
               </div>
               <div class="row">
-                <button class="btn btn-primary" id="btnSaveAllowedUser" type="button">บันทึก uploader</button>
+                <button class="btn btn-primary" id="btnSaveAllowedUser" type="button">บันทึกผู้อัปโหลด</button>
                 <button class="btn btn-secondary" id="btnClearAllowedUser" type="button">ล้างฟอร์ม</button>
               </div>
             </div>
           </div>
 
           <div class="panel">
+            <div class="status warning show admin-warning">การเพิ่มผู้ใช้ในหน้านี้ยังไม่ให้สิทธิ์อัปโหลดไฟล์ ผู้ดูแลต้องเพิ่มอีเมลเดียวกันเป็น Editor ใน Google Drive ด้วยตนเอง</div>
             <div class="panel-head">
               <span class="step-number">i</span>
               <div>
@@ -720,11 +806,11 @@ button, select { cursor: pointer; }
   </section>
 </div>
 
-<div class="overlay" id="progressOverlay">
-  <div class="overlay-card">
+<div class="overlay" id="progressOverlay" role="dialog" aria-modal="true" aria-labelledby="progressTitle" aria-describedby="progressText" aria-hidden="true">
+  <div class="overlay-card" tabindex="-1">
     <h3 id="progressTitle">กำลังทำงาน</h3>
     <div class="hint" id="progressText">กำลังเตรียมข้อมูล...</div>
-    <div class="progress">
+    <div class="progress" id="progressBar" role="progressbar" aria-label="ความคืบหน้าการอัปโหลด" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
       <div class="progress-fill" id="progressFill"></div>
     </div>
   </div>
@@ -755,7 +841,8 @@ const state = {
   googleAuthInitialized: false,
   newFiles: [],
   appendFiles: [],
-  appendTarget: null
+  appendTarget: null,
+  lastFocusedElement: null
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -802,7 +889,9 @@ function bindTabs() {
   document.querySelectorAll(".tab-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach((b) => b.setAttribute("aria-selected", "false"));
       btn.classList.add("active");
+      btn.setAttribute("aria-selected", "true");
       const target = btn.dataset.tab;
       document.getElementById("tab-upload").classList.toggle("hidden", target !== "upload");
       document.getElementById("tab-search").classList.toggle("hidden", target !== "search");
@@ -834,7 +923,7 @@ function bindUploadControls() {
   });
 
   document.getElementById("btnUploadNew").addEventListener("click", handleNewUpload);
-  document.getElementById("btnClearNew").addEventListener("click", clearNewForm);
+  document.getElementById("btnClearNew").addEventListener("click", requestClearNewForm);
 }
 
 function bindAppendControls() {
@@ -1068,6 +1157,9 @@ async function handleNewUpload() {
   const payload = collectNewActivityForm();
   if (!payload) return;
 
+  const uploadButton = document.getElementById("btnUploadNew");
+  uploadButton.disabled = true;
+  uploadButton.textContent = "กำลังอัปโหลด...";
   try {
     showOverlay("กำลังสร้างโฟลเดอร์กิจกรรม", 12);
     const folder = await apiPost({
@@ -1107,12 +1199,18 @@ async function handleNewUpload() {
   } catch (error) {
     hideOverlay();
     showStatus("uploadStatus", "error", error.message);
+  } finally {
+    uploadButton.textContent = "อัปโหลดกิจกรรมใหม่";
+    validateNewUpload();
   }
 }
 
 async function handleAppendUpload() {
   if (!state.appendTarget) return;
 
+  const appendButton = document.getElementById("btnAppendUpload");
+  appendButton.disabled = true;
+  appendButton.textContent = "กำลังอัปโหลด...";
   try {
     await uploadBatch(state.appendFiles, state.appendTarget.folderId, "อัปโหลดเพิ่ม");
 
@@ -1133,6 +1231,9 @@ async function handleAppendUpload() {
   } catch (error) {
     hideOverlay();
     showStatus("appendStatus", "error", error.message);
+  } finally {
+    appendButton.textContent = "อัปโหลดเพิ่ม";
+    validateAppendUpload();
   }
 }
 
@@ -1207,8 +1308,12 @@ async function refreshDriveToken() {
 }
 
 async function handleSearch() {
+  const searchButton = document.getElementById("btnSearch");
   try {
+    searchButton.disabled = true;
+    searchButton.textContent = "กำลังค้นหา...";
     showStatus("searchStatus", "info", "กำลังค้นหา...");
+    renderSearchState("loading");
     const result = await apiGet({
       action: "search",
       idToken: await getFreshIdToken(),
@@ -1220,18 +1325,26 @@ async function handleSearch() {
       uploadedByName: document.getElementById("searchUploader").value.trim()
     });
 
-    renderSearchResults(result.results || []);
-    showStatus("searchStatus", "success", `พบ ${result.results.length} รายการ`);
+    const results = result.results || [];
+    renderSearchResults(results);
+    if (results.length) {
+      showStatus("searchStatus", "success", `พบ ${results.length} รายการ`);
+    } else {
+      clearStatus("searchStatus");
+    }
   } catch (error) {
-    renderSearchResults([]);
+    renderSearchState("error");
     showStatus("searchStatus", "error", error.message);
+  } finally {
+    searchButton.disabled = false;
+    searchButton.textContent = "ค้นหา";
   }
 }
 
 function renderSearchResults(results) {
   const el = document.getElementById("searchResults");
   if (!results.length) {
-    el.innerHTML = '<div class="hint">ยังไม่พบรายการที่ตรงเงื่อนไข</div>';
+    renderSearchState("no-result");
     return;
   }
 
@@ -1257,9 +1370,29 @@ function renderSearchResults(results) {
   `).join("");
 }
 
+function renderSearchState(type) {
+  const states = {
+    loading: ["กำลังค้นหา", "ระบบกำลังตรวจสอบข้อมูลกิจกรรม กรุณารอสักครู่"],
+    "no-result": ["ไม่พบกิจกรรม", "ลองลดตัวกรอง หรือค้นหาด้วยคำที่สั้นลง"],
+    error: ["ค้นหาไม่สำเร็จ", "ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง"]
+  };
+  const [title, message] = states[type] || ["เริ่มค้นหากิจกรรม", "เลือกตัวกรองเท่าที่ทราบ แล้วกดค้นหา"];
+  const el = document.getElementById("searchResults");
+  el.replaceChildren();
+  const box = document.createElement("div");
+  box.className = "empty-state";
+  const strong = document.createElement("strong");
+  strong.textContent = title;
+  box.append(strong, document.createTextNode(message));
+  el.appendChild(box);
+}
+
 function selectAppendTarget(raw) {
   state.appendTarget = JSON.parse(raw);
   document.getElementById("appendTarget").value = `${state.appendTarget.activityName} | ${state.appendTarget.folderPath}`;
+  document.getElementById("appendSelectedName").textContent = state.appendTarget.activityName || "กิจกรรมที่เลือก";
+  document.getElementById("appendSelectedMeta").textContent = `${state.appendTarget.day} ${CONFIG.MONTHS_TH[Number(state.appendTarget.month)] || ""} ${state.appendTarget.yearBE} · ${state.appendTarget.category}`;
+  document.getElementById("appendSelectedSummary").hidden = false;
   showStatus("appendStatus", "info", "เลือกกิจกรรมแล้ว สามารถเพิ่มไฟล์ได้");
   validateAppendUpload();
   document.querySelector('[data-tab="search"]').click();
@@ -1303,7 +1436,25 @@ function renderAllowedUsers(users) {
     return;
   }
 
-  users.forEach((user) => {
+  const groups = [
+    { title: "ผู้ดูแลระบบ", users: users.filter((user) => user.role === "admin") },
+    { title: "ผู้อัปโหลดที่ใช้งานอยู่", users: users.filter((user) => user.role !== "admin" && user.isActive) },
+    { title: "ผู้ใช้ที่ปิดสิทธิ์", users: users.filter((user) => user.role !== "admin" && !user.isActive) }
+  ];
+
+  groups.filter((group) => group.users.length).forEach((group) => {
+    const section = document.createElement("section");
+    section.className = "user-group";
+    const heading = document.createElement("h4");
+    heading.className = "user-group-title";
+    heading.textContent = group.title;
+    const count = document.createElement("span");
+    count.className = "user-group-count";
+    count.textContent = `${group.users.length} คน`;
+    heading.appendChild(count);
+    section.appendChild(heading);
+
+    group.users.forEach((user) => {
     const card = document.createElement("article");
     card.className = "user-card";
 
@@ -1324,7 +1475,7 @@ function renderAllowedUsers(users) {
     actions.className = "user-card-actions";
     const role = document.createElement("span");
     role.className = `user-role${user.isActive ? "" : " inactive"}`;
-    role.textContent = user.role === "admin" ? "Admin" : (user.isActive ? "Uploader" : "ปิดสิทธิ์");
+    role.textContent = user.role === "admin" ? "ผู้ดูแลระบบ" : (user.isActive ? "ผู้อัปโหลด" : "ปิดสิทธิ์");
 
     const editButton = document.createElement("button");
     editButton.className = "btn btn-secondary";
@@ -1341,7 +1492,9 @@ function renderAllowedUsers(users) {
 
     actions.append(role, editButton, toggleButton);
     card.append(main, actions);
-    container.appendChild(card);
+    section.appendChild(card);
+    });
+    container.appendChild(section);
   });
 }
 
@@ -1373,7 +1526,7 @@ async function saveAllowedUser() {
     });
     clearAllowedUserForm();
     await loadAllowedUsers(false);
-    showStatus("userAdminStatus", "success", "บันทึก uploader แล้ว");
+    showStatus("userAdminStatus", "success", "บันทึกผู้อัปโหลดแล้ว");
   } catch (error) {
     showStatus("userAdminStatus", "error", error.message);
   } finally {
@@ -1393,7 +1546,7 @@ async function setAllowedUserActive(user) {
       isActive: nextActive
     });
     await loadAllowedUsers(false);
-    showStatus("userAdminStatus", "success", nextActive ? "เปิดสิทธิ์ uploader แล้ว" : "ปิดสิทธิ์ uploader แล้ว");
+    showStatus("userAdminStatus", "success", nextActive ? "เปิดสิทธิ์ผู้อัปโหลดแล้ว" : "ปิดสิทธิ์ผู้อัปโหลดแล้ว");
   } catch (error) {
     showStatus("userAdminStatus", "error", error.message);
   }
@@ -1430,12 +1583,19 @@ function clearNewForm() {
   validateNewUpload();
 }
 
+function requestClearNewForm() {
+  if (state.newFiles.length && !window.confirm("ล้างข้อมูลกิจกรรมและไฟล์ที่เลือกทั้งหมดใช่หรือไม่")) return;
+  clearNewForm();
+  clearStatus("uploadStatus");
+}
+
 function clearAppendState(resetTarget = true) {
   state.appendFiles = [];
   renderFiles("append");
   if (resetTarget) {
     state.appendTarget = null;
     document.getElementById("appendTarget").value = "";
+    document.getElementById("appendSelectedSummary").hidden = true;
   }
   validateAppendUpload();
 }
@@ -1479,13 +1639,23 @@ async function apiPost(body) {
 }
 
 function showOverlay(text, progress) {
+  const value = Math.max(0, Math.min(progress, 100));
+  const overlay = document.getElementById("progressOverlay");
+  if (!overlay.classList.contains("show")) state.lastFocusedElement = document.activeElement;
   document.getElementById("progressText").textContent = text;
-  document.getElementById("progressFill").style.width = `${Math.max(0, Math.min(progress, 100))}%`;
-  document.getElementById("progressOverlay").classList.add("show");
+  document.getElementById("progressFill").style.width = `${value}%`;
+  document.getElementById("progressBar").setAttribute("aria-valuenow", String(value));
+  overlay.classList.add("show");
+  overlay.setAttribute("aria-hidden", "false");
+  overlay.querySelector(".overlay-card").focus();
 }
 
 function hideOverlay() {
-  document.getElementById("progressOverlay").classList.remove("show");
+  const overlay = document.getElementById("progressOverlay");
+  overlay.classList.remove("show");
+  overlay.setAttribute("aria-hidden", "true");
+  if (state.lastFocusedElement?.focus) state.lastFocusedElement.focus();
+  state.lastFocusedElement = null;
 }
 
 function showStatus(id, type, text) {
