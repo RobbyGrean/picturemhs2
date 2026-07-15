@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PICMHS2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f4ff;
+  --surface: #ffffff;
+  --surface-2: #f3edff;
+  --border: #dfd0ff;
+  --text: #33214d;
+  --muted: #7c6b95;
+  --accent: #7c3aed;
+  --accent-2: #ec4899;
+  --success: #15803d;
+  --danger: #be123c;
+  --shadow: 0 12px 30px rgba(124, 58, 237, 0.12);
+  --radius: 18px;
+  --radius-sm: 12px;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Noto Sans Thai", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(236, 72, 153, 0.12), transparent 22%),
+    radial-gradient(circle at top right, rgba(124, 58, 237, 0.14), transparent 20%),
+    var(--bg);
+  color: var(--text);
+}
+
+button, input, select {
+  font: inherit;
+}
+
+.hidden { display: none !important; }
+
+.shell {
+  min-height: 100vh;
+}
+
+.login-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.login-card {
+  width: min(420px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+  padding: 32px;
+  text-align: center;
+}
+
+.login-card h1 {
+  margin: 0 0 8px;
+  font-size: 32px;
+}
+
+.login-card p {
+  margin: 0 0 24px;
+  color: var(--muted);
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  background: rgba(247, 244, 255, 0.86);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(223, 208, 255, 0.8);
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 22px;
+}
+
+.brand small {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.userbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.username {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.hero {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.hero h2 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.hero p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.tab-btn, .btn {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.tab-btn.active, .btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  border-color: transparent;
+}
+
+.btn:hover, .tab-btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--surface);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 20px;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.panel h3 {
+  margin: 0 0 16px;
+  font-size: 20px;
+}
+
+.stack {
+  display: grid;
+  gap: 14px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.field input, .field select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 11px 12px;
+}
+
+.date-grid,
+.search-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.search-grid.four {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.activity-row {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 10px;
+}
+
+.dropzone {
+  border: 2px dashed #b798ff;
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, #faf7ff, #f3edff);
+  padding: 22px;
+  text-align: center;
+  position: relative;
+}
+
+.dropzone input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.dropzone strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.file-list {
+  display: grid;
+  gap: 8px;
+}
+
+.file-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.hint, .micro {
+  color: var(--muted);
+}
+
+.hint {
+  font-size: 13px;
+}
+
+.micro {
+  font-size: 12px;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.status {
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 14px;
+  display: none;
+}
+
+.status.show { display: block; }
+.status.info { background: #f3edff; border: 1px solid var(--border); }
+.status.success { background: #f0fdf4; border: 1px solid #bbf7d0; color: var(--success); }
+.status.error { background: #fff1f2; border: 1px solid #fecdd3; color: var(--danger); }
+
+.search-results {
+  display: grid;
+  gap: 12px;
+}
+
+.result-card {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.result-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: start;
+}
+
+.result-title {
+  margin: 0;
+  font-size: 18px;
+}
+
+.pill-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.result-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(37, 20, 60, 0.45);
+  padding: 24px;
+}
+
+.overlay.show { display: flex; }
+
+.overlay-card {
+  width: min(420px, 100%);
+  background: var(--surface);
+  border-radius: 24px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.progress {
+  height: 10px;
+  border-radius: 999px;
+  background: #eee7ff;
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  transition: width 0.2s ease;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .date-grid,
+  .search-grid,
+  .search-grid.four,
+  .activity-row {
+    grid-template-columns: 1fr;
+  }
+
+  .result-head {
+    flex-direction: column;
+  }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <section class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <h1>PICMHS2</h1>
+      <p>ระบบอัปโหลดและค้นหาภาพกิจกรรมภายในองค์กร</p>
+      <button class="btn btn-primary" id="btnLogin">เข้าสู่ระบบด้วย Google</button>
+      <p class="micro" style="margin-top:16px">อนุญาตเฉพาะอีเมลที่อยู่ใน allowed list</p>
+    </div>
+  </section>
+
+  <section class="hidden" id="appShell">
+    <header class="topbar">
+      <div class="brand">
+        PICMHS2
+        <small>Google Drive + Sheets + Apps Script</small>
+      </div>
+      <div class="userbox">
+        <div class="username" id="userText">-</div>
+        <button class="btn btn-secondary" id="btnLogout">ออกจากระบบ</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="hero">
+        <h2>อัปโหลดและค้นหากิจกรรม</h2>
+        <p>รองรับสร้างกิจกรรมใหม่ ค้นหากิจกรรมเดิม และอัปโหลดเพิ่มเข้าโฟลเดอร์เดิม</p>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="upload">อัปโหลดใหม่</button>
+        <button class="tab-btn" data-tab="search">ค้นหา / อัปโหลดเพิ่ม</button>
+      </div>
+
+      <section id="tab-upload">
+        <div class="grid">
+          <div class="panel">
+            <h3>สร้างกิจกรรมใหม่</h3>
+            <div class="stack">
+              <div id="uploadStatus" class="status info">พร้อมเริ่มต้น</div>
+
+              <div class="field">
+                <label for="category">หมวด</label>
+                <select id="category"></select>
+              </div>
+
+              <div class="date-grid">
+                <div class="field">
+                  <label for="yearBE">ปี</label>
+                  <select id="yearBE"></select>
+                </div>
+                <div class="field">
+                  <label for="month">เดือน</label>
+                  <select id="month"></select>
+                </div>
+                <div class="field">
+                  <label for="day">วัน</label>
+                  <select id="day">
+                    <option value="">เลือกวัน</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="activity-row">
+                <div class="field">
+                  <label for="activityPreset">ชื่อกิจกรรมแบบเร็ว</label>
+                  <select id="activityPreset"></select>
+                </div>
+                <div class="field">
+                  <label for="activityName">ชื่อกิจกรรม</label>
+                  <input id="activityName" type="text" placeholder="พิมพ์ชื่อกิจกรรม">
+                </div>
+              </div>
+
+              <div class="field">
+                <label>ไฟล์</label>
+                <div class="dropzone" id="dropZone">
+                  <input id="fileInput" type="file" multiple accept="image/*,video/*,.heic,.heif">
+                  <strong>ลากไฟล์มาวาง หรือกดเพื่อเลือกไฟล์</strong>
+                  <div class="hint">รองรับรูปเป็นหลัก และวิดีโอได้เป็นกรณีพิเศษ</div>
+                </div>
+              </div>
+
+              <div class="file-list" id="fileList"></div>
+
+              <div class="row">
+                <button class="btn btn-primary" id="btnUploadNew" disabled>อัปโหลดกิจกรรมใหม่</button>
+                <button class="btn btn-secondary" id="btnClearNew">ล้างฟอร์ม</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>หมายเหตุ MVP</h3>
+            <div class="stack">
+              <div class="hint">กรณีแก้ชื่อกิจกรรม ย้ายไฟล์ หรือลบไฟล์ ให้ทำ manual ใน Drive/Sheets ก่อน</div>
+              <div class="hint">กรณีอัปเพิ่มเข้ากิจกรรมเดิม ให้ใช้แท็บค้นหาแล้วกด “อัปโหลดเพิ่ม”</div>
+              <div class="hint">allowed users และ activity presets จัดการจาก Google Sheets ได้</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-search" class="hidden">
+        <div class="grid">
+          <div class="panel">
+            <h3>ค้นหากิจกรรม</h3>
+            <div class="stack">
+              <div id="searchStatus" class="status info">กรองข้อมูลแล้วกดค้นหา</div>
+
+              <div class="search-grid four">
+                <div class="field">
+                  <label for="searchCategory">หมวด</label>
+                  <select id="searchCategory"></select>
+                </div>
+                <div class="field">
+                  <label for="searchYear">ปี</label>
+                  <select id="searchYear"></select>
+                </div>
+                <div class="field">
+                  <label for="searchMonth">เดือน</label>
+                  <select id="searchMonth"></select>
+                </div>
+                <div class="field">
+                  <label for="searchDay">วัน</label>
+                  <select id="searchDay"></select>
+                </div>
+              </div>
+
+              <div class="search-grid">
+                <div class="field">
+                  <label for="searchActivity">ชื่อกิจกรรม</label>
+                  <input id="searchActivity" type="text" placeholder="ค้นจากชื่อกิจกรรม">
+                </div>
+                <div class="field">
+                  <label for="searchUploader">ชื่อผู้อัปโหลด</label>
+                  <input id="searchUploader" type="text" placeholder="ค้นจากชื่อผู้อัปโหลด">
+                </div>
+                <div class="field" style="align-self:end">
+                  <button class="btn btn-primary" id="btnSearch">ค้นหา</button>
+                </div>
+              </div>
+
+              <div class="search-results" id="searchResults"></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>อัปโหลดเพิ่มเข้ากิจกรรมเดิม</h3>
+            <div class="stack">
+              <div id="appendStatus" class="status info">เลือกกิจกรรมจากผลค้นหาก่อน</div>
+              <div class="field">
+                <label>กิจกรรมที่เลือก</label>
+                <input id="appendTarget" type="text" readonly placeholder="ยังไม่ได้เลือกกิจกรรม">
+              </div>
+              <div class="field">
+                <label>ไฟล์ที่ต้องการอัปเพิ่ม</label>
+                <div class="dropzone">
+                  <input id="appendFileInput" type="file" multiple accept="image/*,video/*,.heic,.heif">
+                  <strong>เลือกไฟล์เพื่ออัปเพิ่ม</strong>
+                  <div class="hint">ระบบจะอัปเข้าโฟลเดอร์เดิมของกิจกรรมนั้น</div>
+                </div>
+              </div>
+              <div class="file-list" id="appendFileList"></div>
+              <div class="row">
+                <button class="btn btn-primary" id="btnAppendUpload" disabled>อัปโหลดเพิ่ม</button>
+                <button class="btn btn-secondary" id="btnAppendClear">ล้าง</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </section>
+</div>
+
+<div class="overlay" id="progressOverlay">
+  <div class="overlay-card">
+    <h3 id="progressTitle">กำลังทำงาน</h3>
+    <div class="hint" id="progressText">กำลังเตรียมข้อมูล...</div>
+    <div class="progress">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+const CONFIG = {
+  APPS_SCRIPT_URL: "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE",
+  GOOGLE_CLIENT_ID: "607972424710-gftopgttfukmekf0uvufalid628vs37a.apps.googleusercontent.com",
+  UPLOAD_YEARS: [2567, 2568, 2569, 2570, 2571],
+  CATEGORIES: ["กิจกรรมและอื่นๆ", "ไปราชการ", "ประชุม"],
+  ACTIVITY_PRESETS: [
+    "ประชุมผู้บริหาร",
+    "ประชุมติดตามงาน",
+    "ไปราชการ",
+    "ต้อนรับคณะ",
+    "อบรม",
+    "กิจกรรมพิเศษ"
+  ],
+  MONTHS_TH: ["", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"]
+};
+
+const state = {
+  currentUser: null,
+  accessToken: null,
+  newFiles: [],
+  appendFiles: [],
+  appendTarget: null
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  bootstrap();
+});
+
+function bootstrap() {
+  seedStaticFields();
+  bindTabs();
+  bindDateControls();
+  bindUploadControls();
+  bindAppendControls();
+  bindSearchControls();
+  bindSessionControls();
+  restoreSession();
+}
+
+function seedStaticFields() {
+  fillCategorySelect(document.getElementById("category"), false);
+  fillCategorySelect(document.getElementById("searchCategory"), true);
+  fillMonthSelect(document.getElementById("month"), false);
+  fillMonthSelect(document.getElementById("searchMonth"), true);
+  fillYearSelect(document.getElementById("yearBE"), false, CONFIG.UPLOAD_YEARS);
+  fillYearSelect(document.getElementById("searchYear"), true, []);
+  fillDaySelect(document.getElementById("searchDay"), true, 31);
+
+  const preset = document.getElementById("activityPreset");
+  preset.innerHTML = '<option value="">เลือก preset หรือพิมพ์เอง</option>' +
+    CONFIG.ACTIVITY_PRESETS.map((item) => `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`).join("");
+  preset.addEventListener("change", () => {
+    if (preset.value) {
+      document.getElementById("activityName").value = preset.value;
+      validateNewUpload();
+    }
+  });
+}
+
+function bindTabs() {
+  document.querySelectorAll(".tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      const target = btn.dataset.tab;
+      document.getElementById("tab-upload").classList.toggle("hidden", target !== "upload");
+      document.getElementById("tab-search").classList.toggle("hidden", target !== "search");
+      if (target === "search") {
+        loadSearchYears();
+      }
+    });
+  });
+}
+
+function bindDateControls() {
+  document.getElementById("yearBE").addEventListener("change", syncUploadDays);
+  document.getElementById("month").addEventListener("change", syncUploadDays);
+  document.getElementById("searchMonth").addEventListener("change", syncSearchDays);
+  document.getElementById("searchYear").addEventListener("change", syncSearchDays);
+}
+
+function bindUploadControls() {
+  ["category", "yearBE", "month", "day", "activityName"].forEach((id) => {
+    document.getElementById(id).addEventListener("input", validateNewUpload);
+    document.getElementById(id).addEventListener("change", validateNewUpload);
+  });
+
+  document.getElementById("fileInput").addEventListener("change", (event) => {
+    addFiles(event.target.files, "new");
+    event.target.value = "";
+  });
+
+  document.getElementById("btnUploadNew").addEventListener("click", handleNewUpload);
+  document.getElementById("btnClearNew").addEventListener("click", clearNewForm);
+}
+
+function bindAppendControls() {
+  document.getElementById("appendFileInput").addEventListener("change", (event) => {
+    addFiles(event.target.files, "append");
+    event.target.value = "";
+  });
+  document.getElementById("btnAppendUpload").addEventListener("click", handleAppendUpload);
+  document.getElementById("btnAppendClear").addEventListener("click", clearAppendState);
+}
+
+function bindSearchControls() {
+  document.getElementById("btnSearch").addEventListener("click", handleSearch);
+  ["searchActivity", "searchUploader"].forEach((id) => {
+    document.getElementById(id).addEventListener("keydown", (event) => {
+      if (event.key === "Enter") handleSearch();
+    });
+  });
+}
+
+function bindSessionControls() {
+  document.getElementById("btnLogin").addEventListener("click", startLogin);
+  document.getElementById("btnLogout").addEventListener("click", logout);
+}
+
+function startLogin() {
+  initGoogleAuth(true);
+}
+
+function restoreSession() {
+  const savedUser = sessionStorage.getItem("picmhs2_user");
+  const savedToken = sessionStorage.getItem("picmhs2_token");
+  if (savedUser && savedToken) {
+    state.currentUser = JSON.parse(savedUser);
+    state.accessToken = savedToken;
+    showAppShell();
+    return;
+  }
+  window.addEventListener("load", () => initGoogleAuth(false), { once: true });
+}
+
+function initGoogleAuth(forcePrompt) {
+  if (!window.google || !window.google.accounts) {
+    setTimeout(() => initGoogleAuth(forcePrompt), 400);
+    return;
+  }
+
+  google.accounts.id.initialize({
+    client_id: CONFIG.GOOGLE_CLIENT_ID,
+    callback: handleCredential
+  });
+
+  if (forcePrompt) {
+    google.accounts.id.prompt();
+  }
+}
+
+function handleCredential(response) {
+  const profile = parseJwt(response.credential);
+  state.currentUser = {
+    email: profile.email,
+    name: profile.name,
+    picture: profile.picture || ""
+  };
+
+  const tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CONFIG.GOOGLE_CLIENT_ID,
+    scope: "https://www.googleapis.com/auth/drive.file",
+    callback: async (tokenResponse) => {
+      if (tokenResponse.error) {
+        showStatus("uploadStatus", "error", "ขอสิทธิ์ Google Drive ไม่สำเร็จ");
+        return;
+      }
+
+      state.accessToken = tokenResponse.access_token;
+      sessionStorage.setItem("picmhs2_user", JSON.stringify(state.currentUser));
+      sessionStorage.setItem("picmhs2_token", state.accessToken);
+
+      try {
+        await apiPost({
+          action: "init",
+          userEmail: state.currentUser.email,
+          userName: state.currentUser.name,
+          idToken: response.credential
+        });
+        showAppShell();
+      } catch (error) {
+        logout();
+        showStatus("uploadStatus", "error", error.message);
+      }
+    }
+  });
+
+  tokenClient.requestAccessToken({ prompt: "consent" });
+}
+
+function showAppShell() {
+  document.getElementById("loginScreen").classList.add("hidden");
+  document.getElementById("appShell").classList.remove("hidden");
+  document.getElementById("userText").textContent = `${state.currentUser.name} (${state.currentUser.email})`;
+  showStatus("uploadStatus", "info", "พร้อมสร้างกิจกรรมใหม่");
+  showStatus("searchStatus", "info", "กรองข้อมูลแล้วกดค้นหา");
+  showStatus("appendStatus", "info", "เลือกกิจกรรมจากผลค้นหาก่อน");
+}
+
+function logout() {
+  sessionStorage.clear();
+  state.currentUser = null;
+  state.accessToken = null;
+  state.newFiles = [];
+  state.appendFiles = [];
+  state.appendTarget = null;
+  document.getElementById("loginScreen").classList.remove("hidden");
+  document.getElementById("appShell").classList.add("hidden");
+  google?.accounts?.id?.disableAutoSelect?.();
+}
+
+function syncUploadDays() {
+  const year = Number(document.getElementById("yearBE").value || 0);
+  const month = Number(document.getElementById("month").value || 0);
+  if (!year || !month) {
+    fillDaySelect(document.getElementById("day"), false, 0);
+    return;
+  }
+  const total = new Date(year - 543, month, 0).getDate();
+  fillDaySelect(document.getElementById("day"), false, total);
+}
+
+function syncSearchDays() {
+  const year = Number(document.getElementById("searchYear").value || 2568);
+  const month = Number(document.getElementById("searchMonth").value || 0);
+  fillDaySelect(document.getElementById("searchDay"), true, month ? new Date(year - 543, month, 0).getDate() : 31);
+}
+
+function fillCategorySelect(el, includeAll) {
+  const first = includeAll ? '<option value="">ทุกหมวด</option>' : '<option value="">เลือกหมวด</option>';
+  el.innerHTML = first + CONFIG.CATEGORIES.map((item) => `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`).join("");
+}
+
+function fillMonthSelect(el, includeAll) {
+  const first = includeAll ? '<option value="">ทุกเดือน</option>' : '<option value="">เลือกเดือน</option>';
+  el.innerHTML = first + CONFIG.MONTHS_TH
+    .map((label, index) => index ? `<option value="${index}">${index} - ${escapeHtml(label)}</option>` : "")
+    .join("");
+}
+
+function fillYearSelect(el, includeAll, years) {
+  const first = includeAll ? '<option value="">ทุกปี</option>' : '<option value="">เลือกปี</option>';
+  const currentYear = new Date().getFullYear() + 543;
+  const source = years.length ? years : CONFIG.UPLOAD_YEARS;
+  el.innerHTML = first + source.map((year) => `<option value="${year}" ${year === currentYear && !includeAll ? "selected" : ""}>${year}</option>`).join("");
+}
+
+function fillDaySelect(el, includeAll, total) {
+  const first = includeAll ? '<option value="">ทุกวัน</option>' : '<option value="">เลือกวัน</option>';
+  let html = first;
+  for (let day = 1; day <= total; day++) {
+    html += `<option value="${day}">${day}</option>`;
+  }
+  el.innerHTML = html;
+}
+
+function addFiles(fileList, mode) {
+  const target = mode === "append" ? state.appendFiles : state.newFiles;
+  Array.from(fileList).forEach((file) => {
+    const exists = target.some((item) => item.name === file.name && item.size === file.size && item.lastModified === file.lastModified);
+    if (!exists) target.push(file);
+  });
+  renderFiles(mode);
+  validateNewUpload();
+  validateAppendUpload();
+}
+
+function renderFiles(mode) {
+  const list = mode === "append" ? state.appendFiles : state.newFiles;
+  const container = document.getElementById(mode === "append" ? "appendFileList" : "fileList");
+  container.innerHTML = list.map((file, index) => `
+    <div class="file-item">
+      <div>${escapeHtml(file.name)}</div>
+      <div class="micro">${formatBytes(file.size)}</div>
+      <button class="btn btn-secondary" type="button" onclick="removeFile('${mode}', ${index})">ลบ</button>
+    </div>
+  `).join("");
+}
+
+function removeFile(mode, index) {
+  if (mode === "append") {
+    state.appendFiles.splice(index, 1);
+  } else {
+    state.newFiles.splice(index, 1);
+  }
+  renderFiles(mode);
+  validateNewUpload();
+  validateAppendUpload();
+}
+
+function validateNewUpload() {
+  const ok = Boolean(
+    document.getElementById("category").value &&
+    document.getElementById("yearBE").value &&
+    document.getElementById("month").value &&
+    document.getElementById("day").value &&
+    document.getElementById("activityName").value.trim() &&
+    state.newFiles.length
+  );
+  document.getElementById("btnUploadNew").disabled = !ok;
+}
+
+function validateAppendUpload() {
+  document.getElementById("btnAppendUpload").disabled = !(state.appendTarget && state.appendFiles.length);
+}
+
+async function handleNewUpload() {
+  const payload = collectNewActivityForm();
+  if (!payload) return;
+
+  try {
+    showOverlay("กำลังสร้างโฟลเดอร์กิจกรรม", 12);
+    const folder = await apiPost({
+      action: "createFolder",
+      idToken: await getFreshIdToken(),
+      userEmail: state.currentUser.email,
+      category: payload.category,
+      yearBE: payload.yearBE,
+      month: payload.month,
+      day: payload.day,
+      activityName: payload.activityName
+    });
+
+    await uploadBatch(state.newFiles, folder.folderId, "อัปโหลดกิจกรรมใหม่");
+
+    showOverlay("กำลังบันทึก metadata", 92);
+    await apiPost({
+      action: "saveMetadata",
+      idToken: await getFreshIdToken(),
+      userEmail: state.currentUser.email,
+      userName: state.currentUser.name,
+      category: payload.category,
+      yearBE: payload.yearBE,
+      month: payload.month,
+      day: payload.day,
+      activityName: payload.activityName,
+      folderId: folder.folderId,
+      folderUrl: folder.folderUrl,
+      folderPath: folder.folderPath,
+      fileCount: state.newFiles.length,
+      uploadMode: "new"
+    });
+
+    hideOverlay();
+    showStatus("uploadStatus", "success", `อัปโหลดสำเร็จ ${state.newFiles.length} ไฟล์`);
+    clearNewForm();
+  } catch (error) {
+    hideOverlay();
+    showStatus("uploadStatus", "error", error.message);
+  }
+}
+
+async function handleAppendUpload() {
+  if (!state.appendTarget) return;
+
+  try {
+    await uploadBatch(state.appendFiles, state.appendTarget.folderId, "อัปโหลดเพิ่ม");
+
+    showOverlay("กำลังอัปเดต metadata", 94);
+    await apiPost({
+      action: "appendMetadata",
+      idToken: await getFreshIdToken(),
+      userEmail: state.currentUser.email,
+      userName: state.currentUser.name,
+      folderId: state.appendTarget.folderId,
+      fileCountDelta: state.appendFiles.length
+    });
+
+    hideOverlay();
+    showStatus("appendStatus", "success", `อัปโหลดเพิ่มสำเร็จ ${state.appendFiles.length} ไฟล์`);
+    clearAppendState(false);
+    handleSearch();
+  } catch (error) {
+    hideOverlay();
+    showStatus("appendStatus", "error", error.message);
+  }
+}
+
+async function uploadBatch(files, folderId, title) {
+  let completed = 0;
+  for (const file of files) {
+    const progress = Math.round((completed / files.length) * 72) + 18;
+    showOverlay(`${title}: ${completed + 1}/${files.length} - ${file.name}`, progress);
+    await uploadFileToDrive(file, folderId);
+    completed += 1;
+  }
+}
+
+async function uploadFileToDrive(file, folderId) {
+  const token = state.accessToken;
+  const initRes = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+      "X-Upload-Content-Type": file.type || "application/octet-stream",
+      "X-Upload-Content-Length": String(file.size)
+    },
+    body: JSON.stringify({
+      name: file.name,
+      parents: [folderId]
+    })
+  });
+
+  if (initRes.status === 401) {
+    await refreshDriveToken();
+    return uploadFileToDrive(file, folderId);
+  }
+
+  if (!initRes.ok) throw new Error(`เริ่มอัปโหลดไม่สำเร็จ (${initRes.status})`);
+  const uploadUrl = initRes.headers.get("Location");
+  if (!uploadUrl) throw new Error("Drive ไม่คืน upload URL");
+
+  const uploadRes = await fetch(uploadUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": file.type || "application/octet-stream"
+    },
+    body: file
+  });
+
+  if (uploadRes.status === 401) {
+    await refreshDriveToken();
+    return uploadFileToDrive(file, folderId);
+  }
+
+  if (!uploadRes.ok) throw new Error(`อัปโหลดไฟล์ไม่สำเร็จ (${uploadRes.status})`);
+}
+
+async function refreshDriveToken() {
+  return new Promise((resolve, reject) => {
+    const tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: CONFIG.GOOGLE_CLIENT_ID,
+      scope: "https://www.googleapis.com/auth/drive.file",
+      callback: (response) => {
+        if (response.error) {
+          reject(new Error("ต่ออายุสิทธิ์ Google Drive ไม่สำเร็จ"));
+          return;
+        }
+        state.accessToken = response.access_token;
+        sessionStorage.setItem("picmhs2_token", state.accessToken);
+        resolve();
+      }
+    });
+    tokenClient.requestAccessToken({ prompt: "" });
+  });
+}
+
+async function handleSearch() {
+  try {
+    showStatus("searchStatus", "info", "กำลังค้นหา...");
+    const result = await apiGet({
+      action: "search",
+      idToken: await getFreshIdToken(),
+      category: document.getElementById("searchCategory").value,
+      yearBE: document.getElementById("searchYear").value,
+      month: document.getElementById("searchMonth").value,
+      day: document.getElementById("searchDay").value,
+      activityName: document.getElementById("searchActivity").value.trim(),
+      uploadedByName: document.getElementById("searchUploader").value.trim()
+    });
+
+    renderSearchResults(result.results || []);
+    showStatus("searchStatus", "success", `พบ ${result.results.length} รายการ`);
+  } catch (error) {
+    renderSearchResults([]);
+    showStatus("searchStatus", "error", error.message);
+  }
+}
+
+function renderSearchResults(results) {
+  const el = document.getElementById("searchResults");
+  if (!results.length) {
+    el.innerHTML = '<div class="hint">ยังไม่พบรายการที่ตรงเงื่อนไข</div>';
+    return;
+  }
+
+  el.innerHTML = results.map((item) => `
+    <article class="result-card">
+      <div class="result-head">
+        <div>
+          <h4 class="result-title">${escapeHtml(item.activityName)}</h4>
+          <div class="pill-row">
+            <span class="pill">${escapeHtml(item.category)}</span>
+            <span class="pill">${item.day} ${escapeHtml(CONFIG.MONTHS_TH[Number(item.month)] || "")} ${item.yearBE}</span>
+            <span class="pill">${item.fileCount} ไฟล์</span>
+            <span class="pill">โดย ${escapeHtml(item.uploadedByName || "-")}</span>
+          </div>
+        </div>
+      </div>
+      <div class="micro">${escapeHtml(item.folderPath || "")}</div>
+      <div class="result-actions">
+        <a class="btn btn-secondary" href="${escapeHtml(item.folderUrl)}" target="_blank" rel="noopener noreferrer">เปิด Drive</a>
+        <button class="btn btn-primary" type="button" onclick='selectAppendTarget(${JSON.stringify(JSON.stringify(item))})'>อัปโหลดเพิ่ม</button>
+      </div>
+    </article>
+  `).join("");
+}
+
+function selectAppendTarget(raw) {
+  state.appendTarget = JSON.parse(raw);
+  document.getElementById("appendTarget").value = `${state.appendTarget.activityName} | ${state.appendTarget.folderPath}`;
+  showStatus("appendStatus", "info", "เลือกกิจกรรมแล้ว สามารถเพิ่มไฟล์ได้");
+  validateAppendUpload();
+  document.querySelector('[data-tab="search"]').click();
+}
+
+async function loadSearchYears() {
+  try {
+    const result = await apiGet({
+      action: "getYears",
+      idToken: await getFreshIdToken()
+    });
+    fillYearSelect(document.getElementById("searchYear"), true, result.years || []);
+  } catch (_) {
+  }
+}
+
+function collectNewActivityForm() {
+  const category = document.getElementById("category").value;
+  const yearBE = Number(document.getElementById("yearBE").value || 0);
+  const month = Number(document.getElementById("month").value || 0);
+  const day = Number(document.getElementById("day").value || 0);
+  const activityName = document.getElementById("activityName").value.trim();
+  if (!category || !yearBE || !month || !day || !activityName || !state.newFiles.length) {
+    showStatus("uploadStatus", "error", "กรอกข้อมูลและเลือกไฟล์ให้ครบก่อน");
+    return null;
+  }
+  return { category, yearBE, month, day, activityName };
+}
+
+function clearNewForm() {
+  document.getElementById("category").value = "";
+  document.getElementById("yearBE").value = CONFIG.UPLOAD_YEARS[0] ? String(CONFIG.UPLOAD_YEARS[0]) : "";
+  document.getElementById("month").value = "";
+  document.getElementById("day").innerHTML = '<option value="">เลือกวัน</option>';
+  document.getElementById("activityPreset").value = "";
+  document.getElementById("activityName").value = "";
+  state.newFiles = [];
+  renderFiles("new");
+  validateNewUpload();
+}
+
+function clearAppendState(resetTarget = true) {
+  state.appendFiles = [];
+  renderFiles("append");
+  if (resetTarget) {
+    state.appendTarget = null;
+    document.getElementById("appendTarget").value = "";
+  }
+  validateAppendUpload();
+}
+
+async function getFreshIdToken() {
+  return new Promise((resolve, reject) => {
+    google.accounts.id.initialize({
+      client_id: CONFIG.GOOGLE_CLIENT_ID,
+      callback: (response) => resolve(response.credential)
+    });
+    google.accounts.id.prompt((notification) => {
+      if (notification.isNotDisplayed?.() || notification.isSkippedMoment?.()) {
+        reject(new Error("ยืนยันตัวตน Google ไม่สำเร็จ"));
+      }
+    });
+  });
+}
+
+async function apiGet(params) {
+  const query = new URLSearchParams(params).toString();
+  const response = await fetch(`${CONFIG.APPS_SCRIPT_URL}?${query}`);
+  const data = await response.json();
+  if (!data.ok) throw new Error(data.error || "เกิดข้อผิดพลาดจากระบบ");
+  return data;
+}
+
+async function apiPost(body) {
+  const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  const data = await response.json();
+  if (!data.ok) throw new Error(data.error || "เกิดข้อผิดพลาดจากระบบ");
+  return data;
+}
+
+function showOverlay(text, progress) {
+  document.getElementById("progressText").textContent = text;
+  document.getElementById("progressFill").style.width = `${Math.max(0, Math.min(progress, 100))}%`;
+  document.getElementById("progressOverlay").classList.add("show");
+}
+
+function hideOverlay() {
+  document.getElementById("progressOverlay").classList.remove("show");
+}
+
+function showStatus(id, type, text) {
+  const el = document.getElementById(id);
+  el.className = `status ${type} show`;
+  el.textContent = text;
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+}
+
+function parseJwt(token) {
+  const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+  return JSON.parse(decodeURIComponent(atob(base64).split("").map((c) => {
+    return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join("")));
+}
+</script>
+</body>
+</html>
