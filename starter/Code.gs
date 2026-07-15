@@ -32,6 +32,7 @@ function doGet(e) {
     if (action === "health") return ok({ message: "PICMHS2 API running" });
     if (action === "getYears") return handleGetYears(identity);
     if (action === "search") return handleSearch(identity, params);
+    if (action === "getAllowedUsers") return handleGetAllowedUsers(identity);
 
     return fail("unknown action");
   } catch (error) {
@@ -144,6 +145,8 @@ function doPost(e) {
     if (action === "createFolder") return handleCreateFolder(identity, payload);
     if (action === "saveMetadata") return handleSaveMetadata(identity, payload);
     if (action === "appendMetadata") return handleAppendMetadata(identity, payload);
+    if (action === "saveAllowedUser") return handleSaveAllowedUser(identity, payload);
+    if (action === "setAllowedUserActive") return handleSetAllowedUserActive(identity, payload);
 
     return fail("unknown action");
   } catch (error) {
@@ -158,7 +161,89 @@ function handleInit(identity) {
   return ok({
     userEmail: identity.email,
     userName: identity.name || "",
-    role: isAdmin(identity.email) ? "admin" : "user"
+    role: isAdmin(identity.email) ? "admin" : "uploader"
+  });
+}
+
+function handleGetAllowedUsers(identity) {
+  ensureAdmin(identity.email);
+  const sheet = getAllowedUsersSheet();
+  ensureAllowedUsersHeader(sheet);
+  const rows = sheet.getDataRange().getValues();
+  if (rows.length <= 1) return ok({ users: [] });
+
+  const header = mapHeader(rows[0]);
+  const users = rows.slice(1).filter(function(row) {
+    return String(row[header.email] || "").trim();
+  }).map(function(row) {
+    const email = normalizeEmail(row[header.email]);
+    return {
+      email: email,
+      displayName: String(row[header.display_name] || ""),
+      isActive: isTruthy(row[header.is_active]),
+      notes: String(row[header.notes] || ""),
+      role: isAdmin(email) ? "admin" : "uploader"
+    };
+  }).sort(function(a, b) {
+    if (a.role !== b.role) return a.role === "admin" ? -1 : 1;
+    return a.email.localeCompare(b.email);
+  });
+
+  return ok({ users: users });
+}
+
+function handleSaveAllowedUser(identity, payload) {
+  ensureAdmin(identity.email);
+  const email = validateAllowedUserEmail(payload.email);
+  const displayName = String(payload.displayName || "").trim().substring(0, 80);
+  const notes = String(payload.notes || "").trim().substring(0, 200);
+  if (!displayName) throw new Error("missing field: displayName");
+
+  return withScriptLock(function() {
+    const sheet = getAllowedUsersSheet();
+    ensureAllowedUsersHeader(sheet);
+    const rows = sheet.getDataRange().getValues();
+    const header = mapHeader(rows[0]);
+    let rowIndex = -1;
+
+    for (let i = 1; i < rows.length; i++) {
+      if (normalizeEmail(rows[i][header.email]) === email) {
+        rowIndex = i + 1;
+        break;
+      }
+    }
+
+    if (rowIndex === -1) {
+      sheet.appendRow([email, displayName, true, notes]);
+    } else {
+      sheet.getRange(rowIndex, header.display_name + 1).setValue(displayName);
+      sheet.getRange(rowIndex, header.notes + 1).setValue(notes);
+    }
+
+    return ok({ saved: true, role: isAdmin(email) ? "admin" : "uploader" });
+  });
+}
+
+function handleSetAllowedUserActive(identity, payload) {
+  ensureAdmin(identity.email);
+  const email = validateAllowedUserEmail(payload.email);
+  const isActive = payload.isActive === true || String(payload.isActive).toLowerCase() === "true";
+  if (isAdmin(email) && !isActive) throw new Error("admin cannot be deactivated");
+
+  return withScriptLock(function() {
+    const sheet = getAllowedUsersSheet();
+    ensureAllowedUsersHeader(sheet);
+    const rows = sheet.getDataRange().getValues();
+    const header = mapHeader(rows[0]);
+
+    for (let i = 1; i < rows.length; i++) {
+      if (normalizeEmail(rows[i][header.email]) === email) {
+        sheet.getRange(i + 1, header.is_active + 1).setValue(isActive);
+        return ok({ updated: true, isActive: isActive });
+      }
+    }
+
+    throw new Error("allowed user not found");
   });
 }
 
@@ -353,6 +438,38 @@ function ensureAllowed(email) {
 
   if (!allowed) throw new Error("email is not allowed");
   return true;
+}
+
+function ensureAdmin(email) {
+  if (!isAdmin(email)) throw new Error("admin access required");
+  return true;
+}
+
+function normalizeEmail(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function validateAllowedUserEmail(value) {
+  const email = normalizeEmail(value);
+  if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new Error("invalid email");
+  }
+  return email;
+}
+
+function isTruthy(value) {
+  const normalized = String(value || "").toLowerCase();
+  return value === true || normalized === "true" || normalized === "1" || normalized === "yes";
+}
+
+function withScriptLock(callback) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    return callback();
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function isAdmin(email) {

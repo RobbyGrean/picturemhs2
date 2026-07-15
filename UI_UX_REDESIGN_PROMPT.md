@@ -130,6 +130,15 @@
 - CTA ไป uploader/public search
 - รองรับ deep links ผ่าน section IDs
 
+#### 8. Admin user management (`index.html` หลัง login เฉพาะ admin)
+
+- แท็บจัดการ uploader แสดงเฉพาะเมื่อ `init.role = admin`
+- ฟอร์ม email, display name และ notes
+- รายชื่อ Admin/Uploader/Inactive
+- Edit, activate และ deactivate states
+- Admin row ต้องไม่สามารถปิดสิทธิ์ได้
+- Uploader ต้องไม่เห็นแท็บ และ backend authorization ต้องยังปฏิเสธ API โดยตรง
+
 ### Component system
 
 สร้าง design tokens ใน CSS variables และใช้ซ้ำอย่างสม่ำเสมอ:

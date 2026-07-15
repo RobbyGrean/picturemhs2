@@ -39,6 +39,7 @@ PICMHS2 แยกผู้ใช้ออกเป็นสองกลุ่ม
 - บันทึก metadata หนึ่งแถวต่อหนึ่งกิจกรรมลง Google Sheets
 - ค้นหากิจกรรมเดิม
 - อัปโหลดไฟล์เพิ่มเข้าโฟลเดอร์กิจกรรมเดิม
+- Admin เพิ่ม แก้ไข เปิด หรือปิดสิทธิ์ uploader จากหน้าเว็บไซต์
 
 ### ฝั่ง public
 
@@ -111,6 +112,8 @@ Uploader ปกติต้องผ่านสามชั้น:
 1. เป็น OAuth test user หาก consent screen ยังอยู่ใน Testing
 2. อยู่ใน Sheet tab `allowed_users` หรือเป็น admin ที่กำหนดไว้
 3. มีสิทธิ์ Editor บน Drive root สำหรับ direct upload
+
+`notes` ใน `allowed_users` เป็นคำอธิบายเท่านั้น ไม่ใช้ตัดสิน role โดย Admin มาจาก `CONFIG.ADMIN_EMAILS` ใน backend ส่วนอีเมลอื่นที่ active ใน `allowed_users` เป็น uploader และเรียก API จัดการผู้ใช้ไม่ได้
 
 ### Public visitor
 
@@ -192,7 +195,19 @@ PICMHS2/
 
 วิธีนี้ทำให้ `file_count`, `updated_at` และ `last_uploaded_by` อัปเดตตามระบบ
 
-## 2.5 สิ่งที่ไม่ควรทำ
+## 2.5 สำหรับ Admin — จัดการ uploader
+
+1. Login ด้วยอีเมลที่อยู่ใน `CONFIG.ADMIN_EMAILS`
+2. เปิดแท็บ **จัดการ uploader**
+3. กรอกอีเมล ชื่อที่แสดง และ notes
+4. กด **บันทึก uploader** ผู้ใช้ใหม่จะเป็น role uploader เสมอ
+5. เพิ่มอีเมลเดียวกันเป็น **Editor** บน Drive root ด้วยตนเอง ระบบจะไม่เปลี่ยน Drive sharing อัตโนมัติ
+6. ใช้ **ปิดสิทธิ์** เมื่อต้องการระงับการเข้าใช้งาน โดยระบบตั้ง `is_active = FALSE` และไม่ลบแถว
+7. ใช้ **เปิดสิทธิ์** เมื่อต้องการให้กลับมาใช้งาน
+
+Uploader ทั่วไปจะไม่เห็นแท็บนี้ และ backend จะปฏิเสธ request แม้พยายามเรียก API โดยตรง
+
+## 2.6 สิ่งที่ไม่ควรทำ
 
 - ไม่ควรสร้างกิจกรรมใหม่ด้วยการสร้างโฟลเดอร์ใน Drive เอง
 - ไม่ควรเปลี่ยนชื่อหรือย้ายโฟลเดอร์ที่ระบบสร้าง หากไม่แก้ metadata ให้ตรงกัน
@@ -200,7 +215,7 @@ PICMHS2/
 - ไม่ควรแชร์ Editor ให้บุคคลที่มีหน้าที่ค้นหาหรือดาวน์โหลดเพียงอย่างเดียว
 - ไม่ควรนำ private/confidential activity ไว้ใต้ public root
 
-## 2.6 การแก้ปัญหาเบื้องต้น
+## 2.7 การแก้ปัญหาเบื้องต้น
 
 | อาการ | ตรวจสอบ |
 |---|---|
@@ -211,6 +226,7 @@ PICMHS2/
 | เปิด Drive แล้วขอ Login | root/child sharing ต้องเป็น Anyone with link Viewer |
 | จำนวนไฟล์ไม่ตรง | มี manual upload/delete; ระบบไม่ scan Drive อัตโนมัติ |
 | Public Search ช้าเป็นบางครั้ง | Apps Script cold start; ลองใหม่และพิจารณา CacheService |
+| ไม่เห็นแท็บจัดการ uploader | ต้อง Login ใหม่ด้วยอีเมลที่อยู่ใน `CONFIG.ADMIN_EMAILS` |
 
 ---
 
@@ -436,6 +452,7 @@ repository/
 Functional MVP ที่ยืนยันแล้ว:
 
 - uploader login/create/upload/metadata flow ทำงาน
+- admin-only allowed user management มี backend authorization แยกจากการซ่อนปุ่มใน UI
 - public search endpoint ทำงานโดยไม่ต้อง authentication
 - public Drive folder เปิดแบบ no-session ได้
 - protected GET/POST actions ยังปฏิเสธ request ที่ไม่มี token

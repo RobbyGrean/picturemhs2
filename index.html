@@ -303,6 +303,16 @@ button, select { cursor: pointer; }
 .result-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .result-actions .btn { flex: 1 1 120px; text-align: center; text-decoration: none; }
 
+.admin-grid { display: grid; gap: 16px; }
+.user-list { display: grid; gap: 9px; }
+.user-card { display: grid; gap: 10px; padding: 13px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+.user-card-main { min-width: 0; }
+.user-card-main strong, .user-card-main span { display: block; overflow-wrap: anywhere; }
+.user-card-main span { color: var(--muted); font-size: 12px; }
+.user-card-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.user-role { padding: 3px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-strong); font-size: 11px; font-weight: 700; }
+.user-role.inactive { background: #fff0f2; color: var(--danger); }
+
 .overlay { position: fixed; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(13, 42, 35, .56); }
 .overlay.show { display: flex; }
 .overlay-card { width: min(400px, 100%); padding: 22px; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); }
@@ -326,6 +336,8 @@ button, select { cursor: pointer; }
   .search-grid { grid-template-columns: repeat(3, 1fr); }
   .search-grid.four { grid-template-columns: repeat(4, 1fr); }
   .panel { padding: 20px; }
+  .admin-grid { grid-template-columns: minmax(280px, .8fr) minmax(0, 1.2fr); align-items: start; }
+  .user-card { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
 }
 
 @media (min-width: 900px) {
@@ -486,6 +498,7 @@ button, select { cursor: pointer; }
       <div class="tabs">
         <button class="tab-btn active" data-tab="upload">อัปโหลดใหม่</button>
         <button class="tab-btn" data-tab="search">ค้นหา / อัปโหลดเพิ่ม</button>
+        <button class="tab-btn hidden" id="adminTabButton" data-tab="users">จัดการ uploader</button>
       </div>
 
       <section id="tab-upload">
@@ -659,6 +672,50 @@ button, select { cursor: pointer; }
           </div>
         </div>
       </section>
+
+      <section id="tab-users" class="hidden">
+        <div class="admin-grid">
+          <div class="panel">
+            <div class="panel-head">
+              <span class="step-number">+</span>
+              <div>
+                <h3>เพิ่มหรือแก้ไข uploader</h3>
+                <p class="panel-subtitle">ผู้ที่เพิ่มใหม่จะเป็น uploader และไม่มีสิทธิ์จัดการผู้ใช้งาน</p>
+              </div>
+            </div>
+            <div class="stack">
+              <div id="userAdminStatus" class="status" role="status" aria-live="polite"></div>
+              <div class="field">
+                <label for="allowedUserEmail">อีเมล <span class="required" aria-hidden="true">*</span></label>
+                <input id="allowedUserEmail" type="email" maxlength="254" autocomplete="off" placeholder="name@example.com">
+              </div>
+              <div class="field">
+                <label for="allowedUserName">ชื่อที่แสดง <span class="required" aria-hidden="true">*</span></label>
+                <input id="allowedUserName" type="text" maxlength="80" autocomplete="off" placeholder="ชื่อผู้ใช้งาน">
+              </div>
+              <div class="field">
+                <label for="allowedUserNotes">หมายเหตุ</label>
+                <input id="allowedUserNotes" type="text" maxlength="200" autocomplete="off" placeholder="เช่น ฝ่ายประชาสัมพันธ์">
+              </div>
+              <div class="row">
+                <button class="btn btn-primary" id="btnSaveAllowedUser" type="button">บันทึก uploader</button>
+                <button class="btn btn-secondary" id="btnClearAllowedUser" type="button">ล้างฟอร์ม</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <span class="step-number">i</span>
+              <div>
+                <h3>รายชื่อผู้ได้รับอนุญาต</h3>
+                <p class="panel-subtitle">ปิดสถานะแทนการลบ เพื่อเก็บข้อมูลและเปิดสิทธิ์กลับได้</p>
+              </div>
+            </div>
+            <div class="user-list" id="allowedUsersList"></div>
+          </div>
+        </div>
+      </section>
     </main>
   </section>
 </div>
@@ -712,6 +769,7 @@ function bootstrap() {
   bindUploadControls();
   bindAppendControls();
   bindSearchControls();
+  bindAdminControls();
   bindSessionControls();
   restoreSession();
 }
@@ -748,9 +806,11 @@ function bindTabs() {
       const target = btn.dataset.tab;
       document.getElementById("tab-upload").classList.toggle("hidden", target !== "upload");
       document.getElementById("tab-search").classList.toggle("hidden", target !== "search");
+      document.getElementById("tab-users").classList.toggle("hidden", target !== "users");
       if (target === "search") {
         loadSearchYears();
       }
+      if (target === "users") loadAllowedUsers();
     });
   });
 }
@@ -795,6 +855,11 @@ function bindSearchControls() {
   });
 }
 
+function bindAdminControls() {
+  document.getElementById("btnSaveAllowedUser").addEventListener("click", saveAllowedUser);
+  document.getElementById("btnClearAllowedUser").addEventListener("click", clearAllowedUserForm);
+}
+
 function bindSessionControls() {
   document.getElementById("btnLogout").addEventListener("click", logout);
 }
@@ -836,7 +901,7 @@ function initGoogleAuth() {
   state.googleAuthInitialized = true;
 }
 
-function handleCredential(response) {
+async function handleCredential(response) {
   showStatus("loginStatus", "info", "กำลังตรวจสอบสิทธิ์ Google และ Drive...");
   state.idToken = response.credential;
   const profile = parseJwt(response.credential);
@@ -845,6 +910,20 @@ function handleCredential(response) {
     name: profile.name,
     picture: profile.picture || ""
   };
+
+  try {
+    const initResult = await apiPost({
+      action: "init",
+      userEmail: state.currentUser.email,
+      userName: state.currentUser.name,
+      idToken: response.credential
+    });
+    state.currentUser.role = initResult.role || "uploader";
+  } catch (error) {
+    logout();
+    showStatus("loginStatus", "error", error.message);
+    return;
+  }
 
   const tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CONFIG.GOOGLE_CLIENT_ID,
@@ -860,19 +939,7 @@ function handleCredential(response) {
       sessionStorage.setItem("picmhs2_user", JSON.stringify(state.currentUser));
       sessionStorage.setItem("picmhs2_token", state.accessToken);
       sessionStorage.setItem("picmhs2_id_token", state.idToken);
-
-      try {
-        await apiPost({
-          action: "init",
-          userEmail: state.currentUser.email,
-          userName: state.currentUser.name,
-          idToken: response.credential
-        });
-        showAppShell();
-      } catch (error) {
-        logout();
-        showStatus("loginStatus", "error", error.message);
-      }
+      showAppShell();
     }
   });
 
@@ -883,6 +950,7 @@ function showAppShell() {
   document.getElementById("loginScreen").classList.add("hidden");
   document.getElementById("appShell").classList.remove("hidden");
   document.getElementById("userText").textContent = `${state.currentUser.name} (${state.currentUser.email})`;
+  document.getElementById("adminTabButton").classList.toggle("hidden", state.currentUser.role !== "admin");
   clearStatus("uploadStatus");
   clearStatus("searchStatus");
   clearStatus("appendStatus");
@@ -1206,6 +1274,135 @@ async function loadSearchYears() {
     fillYearSelect(document.getElementById("searchYear"), true, result.years || []);
   } catch (_) {
   }
+}
+
+async function loadAllowedUsers(showLoading = true) {
+  if (state.currentUser?.role !== "admin") return;
+  try {
+    if (showLoading) showStatus("userAdminStatus", "info", "กำลังโหลดรายชื่อผู้ใช้งาน...");
+    const result = await apiGet({
+      action: "getAllowedUsers",
+      idToken: await getFreshIdToken()
+    });
+    renderAllowedUsers(result.users || []);
+    if (showLoading) clearStatus("userAdminStatus");
+  } catch (error) {
+    showStatus("userAdminStatus", "error", error.message);
+  }
+}
+
+function renderAllowedUsers(users) {
+  const container = document.getElementById("allowedUsersList");
+  container.replaceChildren();
+
+  if (!users.length) {
+    const empty = document.createElement("div");
+    empty.className = "hint";
+    empty.textContent = "ยังไม่มีรายชื่อผู้ได้รับอนุญาต";
+    container.appendChild(empty);
+    return;
+  }
+
+  users.forEach((user) => {
+    const card = document.createElement("article");
+    card.className = "user-card";
+
+    const main = document.createElement("div");
+    main.className = "user-card-main";
+    const name = document.createElement("strong");
+    name.textContent = user.displayName || user.email;
+    const email = document.createElement("span");
+    email.textContent = user.email;
+    main.append(name, email);
+    if (user.notes) {
+      const notes = document.createElement("span");
+      notes.textContent = user.notes;
+      main.appendChild(notes);
+    }
+
+    const actions = document.createElement("div");
+    actions.className = "user-card-actions";
+    const role = document.createElement("span");
+    role.className = `user-role${user.isActive ? "" : " inactive"}`;
+    role.textContent = user.role === "admin" ? "Admin" : (user.isActive ? "Uploader" : "ปิดสิทธิ์");
+
+    const editButton = document.createElement("button");
+    editButton.className = "btn btn-secondary";
+    editButton.type = "button";
+    editButton.textContent = "แก้ไข";
+    editButton.addEventListener("click", () => editAllowedUser(user));
+
+    const toggleButton = document.createElement("button");
+    toggleButton.className = "btn btn-secondary";
+    toggleButton.type = "button";
+    toggleButton.textContent = user.isActive ? "ปิดสิทธิ์" : "เปิดสิทธิ์";
+    toggleButton.disabled = user.role === "admin";
+    toggleButton.addEventListener("click", () => setAllowedUserActive(user));
+
+    actions.append(role, editButton, toggleButton);
+    card.append(main, actions);
+    container.appendChild(card);
+  });
+}
+
+function editAllowedUser(user) {
+  document.getElementById("allowedUserEmail").value = user.email;
+  document.getElementById("allowedUserName").value = user.displayName || "";
+  document.getElementById("allowedUserNotes").value = user.notes || "";
+  document.getElementById("allowedUserEmail").focus();
+}
+
+async function saveAllowedUser() {
+  const email = document.getElementById("allowedUserEmail").value.trim();
+  const displayName = document.getElementById("allowedUserName").value.trim();
+  const notes = document.getElementById("allowedUserNotes").value.trim();
+  if (!email || !displayName) {
+    showStatus("userAdminStatus", "error", "กรอกอีเมลและชื่อที่แสดงให้ครบ");
+    return;
+  }
+
+  const button = document.getElementById("btnSaveAllowedUser");
+  button.disabled = true;
+  try {
+    await apiPost({
+      action: "saveAllowedUser",
+      idToken: await getFreshIdToken(),
+      email: email,
+      displayName: displayName,
+      notes: notes
+    });
+    clearAllowedUserForm();
+    await loadAllowedUsers(false);
+    showStatus("userAdminStatus", "success", "บันทึก uploader แล้ว");
+  } catch (error) {
+    showStatus("userAdminStatus", "error", error.message);
+  } finally {
+    button.disabled = false;
+  }
+}
+
+async function setAllowedUserActive(user) {
+  const nextActive = !user.isActive;
+  if (!nextActive && !window.confirm(`ปิดสิทธิ์ ${user.email} ใช่หรือไม่`)) return;
+
+  try {
+    await apiPost({
+      action: "setAllowedUserActive",
+      idToken: await getFreshIdToken(),
+      email: user.email,
+      isActive: nextActive
+    });
+    await loadAllowedUsers(false);
+    showStatus("userAdminStatus", "success", nextActive ? "เปิดสิทธิ์ uploader แล้ว" : "ปิดสิทธิ์ uploader แล้ว");
+  } catch (error) {
+    showStatus("userAdminStatus", "error", error.message);
+  }
+}
+
+function clearAllowedUserForm() {
+  document.getElementById("allowedUserEmail").value = "";
+  document.getElementById("allowedUserName").value = "";
+  document.getElementById("allowedUserNotes").value = "";
 }
 
 function collectNewActivityForm() {

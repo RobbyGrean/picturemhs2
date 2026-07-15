@@ -101,6 +101,7 @@
         <a href="#login">เข้าสู่ระบบ uploader</a>
         <a href="#new-activity">สร้างกิจกรรมใหม่</a>
         <a href="#append">อัปโหลดเพิ่ม</a>
+        <a href="#user-admin">จัดการ uploader สำหรับ Admin</a>
         <a href="#manual-policy">กติกา manual upload</a>
         <a href="#troubleshooting">แก้ปัญหาเบื้องต้น</a>
       </aside>
@@ -151,6 +152,20 @@
             <li><div>กด <strong>อัปโหลดเพิ่ม</strong> และรอจน metadata อัปเดต</div></li>
           </ol>
           <p>การใช้ flow นี้ทำให้จำนวนไฟล์และเวลาแก้ไขล่าสุดอัปเดตตามระบบ</p>
+        </section>
+
+        <section class="card" id="user-admin">
+          <h2>จัดการ uploader สำหรับ Admin</h2>
+          <p>เมนูนี้แสดงเฉพาะผู้ดูแลที่กำหนดไว้ใน backend ผู้ที่เพิ่มใหม่จะเป็น uploader และไม่มีสิทธิ์เพิ่มผู้ใช้อื่น</p>
+          <ol class="steps">
+            <li><div>เปิดแท็บ <strong>จัดการ uploader</strong></div></li>
+            <li><div>กรอกอีเมล ชื่อที่แสดง และหมายเหตุ เช่น ฝ่ายหรือหน้าที่</div></li>
+            <li><div>กด <strong>บันทึก uploader</strong></div></li>
+            <li><div>เพิ่มอีเมลเดียวกันเป็น Editor บน Drive root ด้วยตนเอง</div></li>
+            <li><div>ใช้ <strong>ปิดสิทธิ์</strong> เพื่อระงับการใช้งานโดยไม่ลบข้อมูล</div></li>
+            <li><div>ใช้ <strong>เปิดสิทธิ์</strong> เมื่อต้องการให้กลับมาใช้งาน</div></li>
+          </ol>
+          <div class="note">ช่อง notes เป็นคำอธิบาย ไม่ใช่ role ของระบบ Admin ถูกกำหนดจาก backend เท่านั้น ระบบไม่เพิ่มหรือลบ Drive Editor permission อัตโนมัติ</div>
         </section>
 
         <section class="card" id="manual-policy">
