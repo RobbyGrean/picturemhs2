@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="คู่มือการใช้งานระบบจัดเก็บและค้นหารูปภาพกิจกรรม PICMHS2">
+  <title>คู่มือการใช้งาน | PICMHS2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f3f7f6;
+      --surface: #fff;
+      --surface-soft: #eaf4f1;
+      --border: #d5e4e0;
+      --text: #17342e;
+      --muted: #60756f;
+      --accent: #0b735f;
+      --accent-strong: #075949;
+      --warning: #8a5a00;
+      --shadow: 0 14px 38px rgba(21, 55, 47, .08);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; font-family: "Noto Sans Thai", sans-serif; color: var(--text); line-height: 1.65; background: linear-gradient(180deg, #eaf4f1, var(--bg) 360px); }
+    a { color: var(--accent); }
+    a:focus-visible { outline: 3px solid rgba(11, 115, 95, .22); outline-offset: 3px; }
+
+    .topbar { position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(213, 228, 224, .9); background: rgba(255,255,255,.92); backdrop-filter: blur(12px); }
+    .topbar-inner { width: min(1120px, calc(100% - 32px)); min-height: 64px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .brand { color: var(--text); text-decoration: none; font-weight: 700; }
+    .nav { display: flex; gap: 8px; flex-wrap: wrap; }
+    .nav a { padding: 8px 12px; border-radius: 999px; color: var(--accent-strong); background: var(--surface-soft); text-decoration: none; font-size: .85rem; font-weight: 700; }
+
+    .page { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 46px 0 70px; }
+    .hero { max-width: 790px; margin-bottom: 34px; }
+    .eyebrow { margin: 0 0 8px; color: var(--accent); font-size: .82rem; font-weight: 700; letter-spacing: .04em; }
+    h1 { margin: 0; font-size: clamp(2.1rem, 7vw, 4rem); line-height: 1.12; letter-spacing: -.04em; }
+    .hero > p:last-child { margin: 16px 0 0; color: var(--muted); font-size: 1.05rem; }
+
+    .layout { display: grid; gap: 24px; }
+    .toc, .card { border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow); }
+    .toc { align-self: start; padding: 18px; border-radius: 18px; }
+    .toc strong { display: block; margin-bottom: 9px; }
+    .toc a { display: block; padding: 7px 0; color: var(--muted); text-decoration: none; font-size: .9rem; }
+    .toc a:hover { color: var(--accent); }
+    .content { display: grid; gap: 18px; }
+    .card { padding: clamp(20px, 4vw, 32px); border-radius: 22px; }
+    .card h2 { margin: 0 0 8px; font-size: 1.55rem; }
+    .card h3 { margin: 24px 0 7px; font-size: 1.05rem; }
+    .card p { margin: 8px 0; color: var(--muted); }
+    .steps { margin: 16px 0 0; padding: 0; list-style: none; counter-reset: step; display: grid; gap: 10px; }
+    .steps li { counter-increment: step; display: grid; grid-template-columns: 34px 1fr; gap: 11px; align-items: start; }
+    .steps li::before { content: counter(step); display: grid; width: 32px; height: 32px; place-items: center; border-radius: 10px; color: #fff; background: var(--accent); font-size: .78rem; font-weight: 700; }
+    .note { margin-top: 18px; padding: 14px 16px; border-left: 4px solid var(--accent); border-radius: 10px; background: var(--surface-soft); color: var(--accent-strong); }
+    .warning { border-left-color: #c78916; background: #fff8e8; color: var(--warning); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: .9rem; }
+    th, td { padding: 11px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+    th { color: var(--accent-strong); background: var(--surface-soft); }
+    .cta { margin-top: 24px; padding: 28px; border-radius: 22px; background: var(--text); color: #fff; text-align: center; }
+    .cta p { color: #c8d8d4; }
+    .cta a { display: inline-flex; padding: 10px 16px; margin: 4px; border-radius: 12px; background: #fff; color: var(--accent-strong); text-decoration: none; font-weight: 700; }
+
+    @media (min-width: 880px) {
+      .layout { grid-template-columns: 230px 1fr; align-items: start; }
+      .toc { position: sticky; top: 88px; }
+    }
+
+    @media (max-width: 600px) {
+      .topbar-inner { align-items: flex-start; flex-direction: column; padding: 12px 0; }
+      .nav { width: 100%; }
+      .nav a { flex: 1; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="./">PICMHS2 · คู่มือการใช้งาน</a>
+      <nav class="nav" aria-label="ทางลัด">
+        <a href="./">Uploader</a>
+        <a href="./public/">ค้นหารูปสาธารณะ</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="hero">
+      <p class="eyebrow">PICMHS2 USER GUIDE</p>
+      <h1>จัดเก็บและค้นหารูปกิจกรรมอย่างเป็นระบบ</h1>
+      <p>คู่มือนี้อธิบายการค้นหารูป การสร้างกิจกรรมใหม่ การอัปโหลดเพิ่ม และขอบเขตของข้อมูลที่ระบบดูแล</p>
+    </section>
+
+    <div class="layout">
+      <aside class="toc" aria-label="สารบัญ">
+        <strong>สารบัญ</strong>
+        <a href="#public-search">ค้นหารูปสำหรับบุคคลทั่วไป</a>
+        <a href="#login">เข้าสู่ระบบ uploader</a>
+        <a href="#new-activity">สร้างกิจกรรมใหม่</a>
+        <a href="#append">อัปโหลดเพิ่ม</a>
+        <a href="#manual-policy">กติกา manual upload</a>
+        <a href="#troubleshooting">แก้ปัญหาเบื้องต้น</a>
+      </aside>
+
+      <div class="content">
+        <section class="card" id="public-search">
+          <h2>ค้นหารูปสำหรับบุคคลทั่วไป</h2>
+          <p>ไม่ต้อง Google Sign-In และไม่มีสิทธิ์อัปโหลดหรือแก้ไขข้อมูล</p>
+          <ol class="steps">
+            <li><div>เปิดหน้า <a href="./public/">ค้นหารูปสาธารณะ</a></div></li>
+            <li><div>เลือกปี เดือน วัน หรือหมวดเท่าที่ทราบ ตัวกรองทุกช่องเป็นตัวเลือก</div></li>
+            <li><div>พิมพ์ชื่อกิจกรรมเต็มหรือคำบางส่วน เช่น “ประชุม”</div></li>
+            <li><div>กด <strong>ค้นหา</strong> และเลือกกิจกรรมจากผลลัพธ์</div></li>
+            <li><div>กด <strong>เปิดโฟลเดอร์รูป</strong> เพื่อดูหรือดาวน์โหลดผ่าน Google Drive</div></li>
+          </ol>
+          <div class="note">จำนวนไฟล์ที่แสดงเป็นจำนวนโดยประมาณจาก metadata ไม่ใช่การนับไฟล์สดจาก Drive</div>
+        </section>
+
+        <section class="card" id="login">
+          <h2>เข้าสู่ระบบ uploader</h2>
+          <ol class="steps">
+            <li><div>เปิด <a href="./">เว็บไซต์หลัก</a></div></li>
+            <li><div>กด Google Sign-In และเลือกบัญชีที่ได้รับอนุญาต</div></li>
+            <li><div>อนุญาตสิทธิ์ Google Drive เมื่อระบบถาม</div></li>
+            <li><div>เมื่อผ่าน allowlist และ Drive permission ระบบจะแสดงหน้าจัดการกิจกรรม</div></li>
+          </ol>
+          <div class="warning note">ผู้ที่มีหน้าที่ค้นหาอย่างเดียวไม่ควรได้รับ Editor permission ให้ใช้หน้า Public Search แทน</div>
+        </section>
+
+        <section class="card" id="new-activity">
+          <h2>สร้างกิจกรรมใหม่</h2>
+          <ol class="steps">
+            <li><div>เลือกหมวด ปี พ.ศ. เดือน และวัน</div></li>
+            <li><div>เลือกชื่อสำเร็จรูปหรือพิมพ์ชื่อกิจกรรมเอง</div></li>
+            <li><div>เลือกรูปหรือวิดีโอและตรวจรายการไฟล์</div></li>
+            <li><div>กด <strong>อัปโหลดกิจกรรมใหม่</strong></div></li>
+            <li><div>รอจนสร้างโฟลเดอร์ อัปโหลดไฟล์ และบันทึก metadata สำเร็จครบทุกขั้น</div></li>
+          </ol>
+          <div class="note">อย่าปิด browser ระหว่างอัปโหลด และอย่าสร้างโฟลเดอร์กิจกรรมซ้ำเองใน Drive</div>
+        </section>
+
+        <section class="card" id="append">
+          <h2>ค้นหาและอัปโหลดเพิ่ม</h2>
+          <ol class="steps">
+            <li><div>เปิดแท็บค้นหาในระบบ uploader</div></li>
+            <li><div>ค้นหาและเลือกกิจกรรมเดิม</div></li>
+            <li><div>เลือกไฟล์ที่ต้องการเพิ่ม</div></li>
+            <li><div>กด <strong>อัปโหลดเพิ่ม</strong> และรอจน metadata อัปเดต</div></li>
+          </ol>
+          <p>การใช้ flow นี้ทำให้จำนวนไฟล์และเวลาแก้ไขล่าสุดอัปเดตตามระบบ</p>
+        </section>
+
+        <section class="card" id="manual-policy">
+          <h2>กติกา manual upload</h2>
+          <p>ระบบค้นหาจาก Google Sheets metadata และไม่สแกน Drive อัตโนมัติ</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>การกระทำใน Drive</th><th>ผลในระบบ</th></tr></thead>
+              <tbody>
+                <tr><td>เพิ่มไฟล์ในกิจกรรมเดิม</td><td>เปิด Drive แล้วเห็นไฟล์ แต่จำนวนไฟล์อาจไม่เพิ่ม</td></tr>
+                <tr><td>สร้างโฟลเดอร์กิจกรรมเอง</td><td>ค้นหาไม่เจอ เพราะไม่มี metadata</td></tr>
+                <tr><td>เปลี่ยนชื่อหรือย้ายโฟลเดอร์</td><td>ชื่อ หมวด หรือ path ในผลค้นหาอาจไม่ตรง</td></tr>
+                <tr><td>ลบโฟลเดอร์</td><td>ผลค้นหาอาจยังอยู่ แต่ลิงก์เปิดไม่ได้</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="warning note">กิจกรรมที่ต้องการให้ระบบดูแลต้องสร้างและเพิ่มไฟล์ผ่าน PICMHS2 ข้อมูล manual ถือว่าอยู่นอกการรับประกันของระบบ</div>
+        </section>
+
+        <section class="card" id="troubleshooting">
+          <h2>แก้ปัญหาเบื้องต้น</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>อาการ</th><th>แนวทางตรวจสอบ</th></tr></thead>
+              <tbody>
+                <tr><td>ค้นหาไม่พบ</td><td>ลดตัวกรอง ตรวจชื่อกิจกรรม และยืนยันว่ากิจกรรมสร้างผ่านระบบ</td></tr>
+                <tr><td>เปิดโฟลเดอร์ไม่ได้</td><td>แจ้ง admin ตรวจ Drive sharing และ child limited access</td></tr>
+                <tr><td>Login ไม่ได้</td><td>ตรวจว่าใช้อีเมลที่อยู่ใน allowlist และได้รับ Drive Editor permission</td></tr>
+                <tr><td>อัปโหลดไม่ได้</td><td>ลอง Login ใหม่ ตรวจ internet และอย่าปิด browser ระหว่างทำงาน</td></tr>
+                <tr><td>จำนวนไฟล์ไม่ตรง</td><td>มีการเพิ่มหรือลบไฟล์ผ่าน Drive โดยตรง ระบบไม่ sync อัตโนมัติ</td></tr>
+                <tr><td>ค้นหาช้าเป็นบางครั้ง</td><td>Apps Script อาจเริ่มระบบใหม่ กรุณารอสักครู่แล้วลองอีกครั้ง</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <section class="cta">
+      <h2>พร้อมใช้งาน</h2>
+      <p>เลือกหน้าที่ตรงกับสิทธิ์ของคุณ</p>
+      <a href="./">เข้าสู่ระบบ uploader</a>
+      <a href="./public/">ค้นหารูปสาธารณะ</a>
+      <a href="https://github.com/RobbyGrean/picturemhs2#readme" target="_blank" rel="noopener noreferrer">คู่มือสร้างระบบของคุณเอง</a>
+    </section>
+  </main>
+</body>
+</html>

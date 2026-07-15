@@ -44,6 +44,9 @@
       padding: 24px 16px 48px;
     }
 
+    .utility-nav { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 20px; }
+    .utility-nav a { padding: 7px 11px; border-radius: 999px; color: var(--accent); background: var(--surface); border: 1px solid var(--border); text-decoration: none; font-size: .82rem; font-weight: 700; }
+
     .hero { margin: 12px 0 22px; }
     .eyebrow { margin: 0 0 6px; color: var(--accent); font-weight: 700; }
     h1 { margin: 0; font-size: clamp(1.75rem, 5vw, 2.6rem); line-height: 1.2; }
@@ -137,6 +140,10 @@
 </head>
 <body>
   <main class="page">
+    <nav class="utility-nav" aria-label="ทางลัด">
+      <a href="../guide.html">คู่มือการใช้งาน</a>
+      <a href="../">สำหรับ uploader</a>
+    </nav>
     <header class="hero">
       <p class="eyebrow">PICMHS2 Public Search</p>
       <h1>ค้นหารูปภาพกิจกรรม</h1>
