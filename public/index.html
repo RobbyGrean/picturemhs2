@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ค้นหารูปภาพกิจกรรม PICMHS2 และเปิดดูใน Google Drive">
+  <title>ค้นหารูปกิจกรรม | PICMHS2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f4ff;
+      --surface: #fff;
+      --surface-soft: #f3edff;
+      --border: #dfd0ff;
+      --text: #33214d;
+      --muted: #746487;
+      --accent: #7138d0;
+      --accent-2: #d93686;
+      --danger: #b4233f;
+      --success: #176b3a;
+      --shadow: 0 14px 34px rgba(79, 39, 126, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Noto Sans Thai", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(217, 54, 134, 0.1), transparent 24rem),
+        radial-gradient(circle at top right, rgba(113, 56, 208, 0.13), transparent 22rem),
+        var(--bg);
+    }
+
+    button, input, select { font: inherit; }
+
+    .page {
+      width: min(980px, 100%);
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+
+    .hero { margin: 12px 0 22px; }
+    .eyebrow { margin: 0 0 6px; color: var(--accent); font-weight: 700; }
+    h1 { margin: 0; font-size: clamp(1.75rem, 5vw, 2.6rem); line-height: 1.2; }
+    .hero p { margin: 10px 0 0; color: var(--muted); }
+
+    .panel, .result-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .panel { border-radius: 24px; padding: 18px; }
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .field { display: grid; gap: 6px; }
+    .field-wide { grid-column: 1 / -1; }
+    label { font-size: 0.86rem; font-weight: 700; }
+
+    input, select {
+      width: 100%;
+      min-height: 46px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      background: var(--surface-soft);
+    }
+
+    input:focus, select:focus, button:focus-visible, a:focus-visible {
+      outline: 3px solid rgba(113, 56, 208, 0.22);
+      outline-offset: 2px;
+    }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+    .button {
+      min-height: 44px;
+      padding: 10px 18px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      color: var(--text);
+      background: var(--surface);
+      font-weight: 600;
+    }
+
+    .button-primary {
+      border-color: transparent;
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    }
+
+    .button[disabled] { cursor: wait; opacity: 0.65; }
+
+    .status {
+      margin: 18px 0;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface-soft);
+      color: var(--muted);
+    }
+
+    .status[data-type="error"] { border-color: #ffc8d2; background: #fff1f3; color: var(--danger); }
+    .status[data-type="success"] { border-color: #bce4cb; background: #f0fbf4; color: var(--success); }
+    .status[hidden] { display: none; }
+
+    .results { display: grid; gap: 14px; }
+    .result-card { border-radius: 18px; padding: 16px; }
+    .result-card h2 { margin: 0; font-size: 1.12rem; }
+    .meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 14px; }
+    .pill { padding: 4px 10px; border-radius: 999px; background: var(--surface-soft); color: var(--muted); font-size: 0.82rem; }
+    .unavailable { margin: 0; color: var(--danger); font-size: 0.88rem; }
+    .privacy-note { margin: 18px 2px 0; color: var(--muted); font-size: 0.83rem; }
+
+    @media (min-width: 760px) {
+      .page { padding-top: 44px; }
+      .panel { padding: 24px; }
+      .filters { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .field-wide { grid-column: span 2; }
+      .result-card { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 18px; }
+      .result-card .button { white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">PICMHS2 Public Search</p>
+      <h1>ค้นหารูปภาพกิจกรรม</h1>
+      <p>ค้นหาจากวัน หมวด หรือชื่อกิจกรรม แล้วเปิดโฟลเดอร์รูปใน Google Drive</p>
+    </header>
+
+    <section class="panel" aria-labelledby="searchHeading">
+      <h2 id="searchHeading" style="margin-top:0">ตัวกรองการค้นหา</h2>
+      <form id="searchForm">
+        <div class="filters">
+          <div class="field">
+            <label for="yearBE">ปี พ.ศ.</label>
+            <select id="yearBE" name="yearBE"><option value="">ทุกปี</option></select>
+          </div>
+          <div class="field">
+            <label for="month">เดือน</label>
+            <select id="month" name="month"><option value="">ทุกเดือน</option></select>
+          </div>
+          <div class="field">
+            <label for="day">วัน</label>
+            <select id="day" name="day"><option value="">ทุกวัน</option></select>
+          </div>
+          <div class="field">
+            <label for="category">หมวด</label>
+            <select id="category" name="category"><option value="">ทุกหมวด</option></select>
+          </div>
+          <div class="field field-wide">
+            <label for="activityName">ชื่อกิจกรรม</label>
+            <input id="activityName" name="activityName" type="search" maxlength="100" placeholder="พิมพ์ชื่อกิจกรรมหรือคำบางส่วน">
+          </div>
+        </div>
+        <div class="actions">
+          <button class="button button-primary" id="searchButton" type="submit">ค้นหา</button>
+          <button class="button" id="clearButton" type="button">ล้างตัวกรอง</button>
+        </div>
+      </form>
+    </section>
+
+    <div class="status" id="status" role="status" aria-live="polite">เลือกตัวกรองแล้วกดค้นหา หรือค้นหาโดยไม่เลือกตัวกรองเพื่อดู 10 กิจกรรมล่าสุด</div>
+    <section class="results" id="results" aria-label="ผลการค้นหา"></section>
+    <p class="privacy-note">ลิงก์นี้ใช้สำหรับดูข้อมูลกิจกรรมที่ได้รับอนุญาตให้เผยแพร่แล้วเท่านั้น การดาวน์โหลดทำผ่านเครื่องมือของ Google Drive</p>
+  </main>
+
+  <script>
+    const CONFIG = {
+      API_URL: "https://script.google.com/macros/s/AKfycbzDyucuarduxEiLv-s4mpgoeJ6cKrx77nMPlc30-tb82z3DDsLPgVcqO1zSSwV5WXBZig/exec",
+      REQUEST_TIMEOUT_MS: 15000,
+      YEARS: [2567, 2568, 2569, 2570, 2571],
+      CATEGORIES: ["กิจกรรมและอื่นๆ", "ไปราชการ", "ประชุม"],
+      MONTHS: ["", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"]
+    };
+
+    const form = document.getElementById("searchForm");
+    const statusBox = document.getElementById("status");
+    const resultsBox = document.getElementById("results");
+    const searchButton = document.getElementById("searchButton");
+
+    seedOptions();
+    form.addEventListener("submit", handleSearch);
+    document.getElementById("clearButton").addEventListener("click", clearFilters);
+    document.getElementById("yearBE").addEventListener("change", syncDays);
+    document.getElementById("month").addEventListener("change", syncDays);
+
+    function seedOptions() {
+      appendOptions(document.getElementById("yearBE"), CONFIG.YEARS.map((year) => [year, year]));
+      appendOptions(document.getElementById("month"), CONFIG.MONTHS.slice(1).map((name, index) => [index + 1, name]));
+      appendOptions(document.getElementById("category"), CONFIG.CATEGORIES.map((name) => [name, name]));
+      syncDays();
+    }
+
+    function appendOptions(select, options) {
+      options.forEach(([value, label]) => {
+        const option = document.createElement("option");
+        option.value = String(value);
+        option.textContent = String(label);
+        select.appendChild(option);
+      });
+    }
+
+    function syncDays() {
+      const select = document.getElementById("day");
+      const selected = select.value;
+      const yearBE = Number(document.getElementById("yearBE").value || 2569);
+      const month = Number(document.getElementById("month").value || 0);
+      const total = month ? new Date(yearBE - 543, month, 0).getDate() : 31;
+      select.replaceChildren(new Option("ทุกวัน", ""));
+      appendOptions(select, Array.from({ length: total }, (_, index) => [index + 1, index + 1]));
+      if (Number(selected) <= total) select.value = selected;
+    }
+
+    async function handleSearch(event) {
+      event.preventDefault();
+      setLoading(true);
+      showStatus("กำลังค้นหากิจกรรม...", "info");
+      resultsBox.replaceChildren();
+
+      try {
+        const params = new URLSearchParams({ action: "publicSearch" });
+        new FormData(form).forEach((value, key) => {
+          const normalized = String(value).trim();
+          if (normalized) params.set(key, normalized);
+        });
+
+        const data = await fetchJson(`${CONFIG.API_URL}?${params}`, CONFIG.REQUEST_TIMEOUT_MS);
+        if (!data.ok) throw new Error(toThaiApiError(data.error));
+        renderResults(Array.isArray(data.results) ? data.results : []);
+
+        if (!data.results || !data.results.length) {
+          showStatus("ไม่พบกิจกรรมที่ตรงกับเงื่อนไข ลองลดตัวกรองหรือใช้คำค้นที่สั้นลง", "info");
+        } else {
+          const suffix = data.truncated ? " (แสดงสูงสุด 50 รายการ กรุณาเพิ่มตัวกรอง)" : "";
+          showStatus(`พบ ${data.results.length} กิจกรรม${suffix}`, "success");
+        }
+      } catch (error) {
+        showStatus(error.name === "AbortError" ? "ระบบใช้เวลาตอบนานเกินไป กรุณาลองใหม่" : error.message, "error");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function fetchJson(url, timeoutMs) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const response = await fetch(url, { signal: controller.signal });
+        if (!response.ok) throw new Error(`เชื่อมต่อระบบค้นหาไม่สำเร็จ (${response.status})`);
+        return await response.json();
+      } catch (error) {
+        if (error.name === "AbortError") throw error;
+        if (error instanceof SyntaxError) throw new Error("ระบบค้นหาส่งข้อมูลกลับมาไม่ถูกต้อง กรุณาลองใหม่");
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    function renderResults(results) {
+      resultsBox.replaceChildren();
+      results.forEach((item) => {
+        const card = document.createElement("article");
+        card.className = "result-card";
+
+        const content = document.createElement("div");
+        const title = document.createElement("h2");
+        title.textContent = item.activityName || "กิจกรรมไม่มีชื่อ";
+        content.appendChild(title);
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        [item.category, formatThaiDate(item), `${Number(item.fileCount || 0)} ไฟล์โดยประมาณ`].forEach((text) => {
+          const pill = document.createElement("span");
+          pill.className = "pill";
+          pill.textContent = text || "-";
+          meta.appendChild(pill);
+        });
+        content.appendChild(meta);
+        card.appendChild(content);
+
+        if (isSafeDriveUrl(item.folderUrl)) {
+          const link = document.createElement("a");
+          link.className = "button button-primary";
+          link.href = item.folderUrl;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = "เปิดโฟลเดอร์รูป";
+          card.appendChild(link);
+        } else {
+          const message = document.createElement("p");
+          message.className = "unavailable";
+          message.textContent = "โฟลเดอร์นี้ยังไม่พร้อมให้เปิดแบบสาธารณะ";
+          card.appendChild(message);
+        }
+
+        resultsBox.appendChild(card);
+      });
+    }
+
+    function formatThaiDate(item) {
+      const month = CONFIG.MONTHS[Number(item.month)] || "";
+      return `${Number(item.day) || "-"} ${month} ${Number(item.yearBE) || "-"}`;
+    }
+
+    function isSafeDriveUrl(value) {
+      try {
+        const url = new URL(String(value || ""));
+        return url.protocol === "https:" && url.hostname === "drive.google.com";
+      } catch (_) {
+        return false;
+      }
+    }
+
+    function toThaiApiError(message) {
+      if (String(message || "").startsWith("invalid public search:")) return "ตัวกรองไม่ถูกต้อง กรุณาตรวจสอบแล้วลองใหม่";
+      return "ระบบค้นหายังไม่พร้อมใช้งาน กรุณาลองใหม่ภายหลัง";
+    }
+
+    function clearFilters() {
+      form.reset();
+      syncDays();
+      resultsBox.replaceChildren();
+      showStatus("ล้างตัวกรองแล้ว กดค้นหาเพื่อดู 10 กิจกรรมล่าสุด", "info");
+      document.getElementById("yearBE").focus();
+    }
+
+    function setLoading(loading) {
+      searchButton.disabled = loading;
+      searchButton.textContent = loading ? "กำลังค้นหา..." : "ค้นหา";
+    }
+
+    function showStatus(message, type) {
+      statusBox.hidden = false;
+      statusBox.dataset.type = type;
+      statusBox.textContent = message;
+    }
+  </script>
+</body>
+</html>

@@ -9,74 +9,154 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #f7f4ff;
+  --bg: #f3f7f6;
   --surface: #ffffff;
-  --surface-2: #f3edff;
-  --border: #dfd0ff;
-  --text: #33214d;
-  --muted: #7c6b95;
-  --accent: #7c3aed;
-  --accent-2: #ec4899;
-  --success: #15803d;
-  --danger: #be123c;
-  --shadow: 0 12px 30px rgba(124, 58, 237, 0.12);
+  --surface-2: #f7faf9;
+  --border: #d9e4e1;
+  --border-strong: #bdcfca;
+  --text: #17342e;
+  --muted: #60756f;
+  --accent: #0b735f;
+  --accent-strong: #075949;
+  --accent-soft: #e6f4f0;
+  --success: #147a45;
+  --danger: #b4233a;
+  --shadow: 0 12px 32px rgba(21, 55, 47, 0.08);
   --radius: 18px;
   --radius-sm: 12px;
 }
 
 * { box-sizing: border-box; }
+
 body {
   margin: 0;
+  min-width: 320px;
   font-family: "Noto Sans Thai", sans-serif;
-  background:
-    radial-gradient(circle at top left, rgba(236, 72, 153, 0.12), transparent 22%),
-    radial-gradient(circle at top right, rgba(124, 58, 237, 0.14), transparent 20%),
-    var(--bg);
+  background: linear-gradient(180deg, #edf6f3 0, var(--bg) 280px);
   color: var(--text);
+  line-height: 1.5;
 }
 
-button, input, select {
-  font: inherit;
-}
-
+button, input, select { font: inherit; }
+button, select { cursor: pointer; }
 .hidden { display: none !important; }
+.shell { min-height: 100vh; }
 
-.shell {
+.landing-screen {
   min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 92% 4%, rgba(61, 191, 154, .18), transparent 25%),
+    radial-gradient(circle at 5% 38%, rgba(11, 115, 95, .11), transparent 24%),
+    #f7fbfa;
 }
 
-.login-screen {
-  min-height: 100vh;
+.landing-wrap { width: min(1160px, calc(100% - 32px)); margin: 0 auto; }
+
+.landing-nav {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 72px;
+  gap: 20px;
+}
+
+.landing-brand { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font-size: 18px; font-weight: 700; }
+.landing-brand-mark { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 12px; background: var(--accent); color: #fff; font-size: 11px; letter-spacing: .04em; box-shadow: 0 8px 18px rgba(11, 115, 95, .2); }
+.landing-links { display: none; align-items: center; gap: 24px; }
+.landing-links a { color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 600; }
+.landing-links a:hover { color: var(--accent-strong); }
+.landing-nav-cta { min-height: 40px; padding: 7px 14px; border-radius: 10px; background: var(--accent-soft); color: var(--accent-strong); text-decoration: none; font-size: 13px; font-weight: 700; }
+
+.landing-hero {
+  position: relative;
   display: grid;
-  place-items: center;
-  padding: 24px;
+  align-items: center;
+  gap: 38px;
+  min-height: 650px;
+  padding: 58px 0 76px;
 }
+
+.landing-hero::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  width: 480px;
+  height: 480px;
+  right: -230px;
+  top: 30px;
+  border: 1px solid rgba(11, 115, 95, .1);
+  border-radius: 50%;
+  box-shadow: 0 0 0 70px rgba(11, 115, 95, .035), 0 0 0 140px rgba(11, 115, 95, .02);
+}
+
+.hero-copy, .hero-visual { position: relative; z-index: 1; }
+.eyebrow { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 15px; padding: 6px 10px; border: 1px solid #c7e4dc; border-radius: 999px; background: rgba(255,255,255,.8); color: var(--accent-strong); font-size: 12px; font-weight: 700; }
+.eyebrow-dot { width: 7px; height: 7px; border-radius: 50%; background: #2eb487; box-shadow: 0 0 0 4px rgba(46, 180, 135, .13); }
+.hero-copy h1 { max-width: 720px; margin: 0; font-size: clamp(38px, 10vw, 68px); line-height: 1.08; letter-spacing: -.045em; }
+.hero-copy h1 span { color: var(--accent); }
+.hero-copy > p { max-width: 590px; margin: 20px 0 0; color: var(--muted); font-size: clamp(16px, 3vw, 19px); }
+.hero-points { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 24px 0 0; padding: 0; list-style: none; }
+.hero-points li { display: flex; align-items: center; gap: 7px; color: #4d6962; font-size: 13px; }
+.hero-points li::before { content: "✓"; display: grid; width: 20px; height: 20px; place-items: center; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 700; }
 
 .login-card {
-  width: min(420px, 100%);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 28px;
-  box-shadow: var(--shadow);
-  padding: 32px;
-  text-align: center;
+  position: relative;
+  width: min(430px, 100%);
+  margin: 0 auto;
+  padding: 25px;
+  background: rgba(255, 255, 255, .94);
+  border: 1px solid rgba(189, 207, 202, .8);
+  border-radius: 24px;
+  box-shadow: 0 28px 70px rgba(21, 55, 47, .15);
+  backdrop-filter: blur(12px);
 }
 
-.login-card h1 {
-  margin: 0 0 8px;
-  font-size: 32px;
-}
+.login-card::after { content: ""; position: absolute; inset: 8px; z-index: -1; border-radius: 19px; background: linear-gradient(135deg, rgba(230, 244, 240, .8), transparent 65%); }
+.login-card-kicker { margin: 0 0 4px; color: var(--accent); font-size: 12px; font-weight: 700; }
+.login-card h2 { margin: 0; font-size: 22px; }
+.login-card > p { margin: 6px 0 19px; color: var(--muted); font-size: 13px; }
+.google-signin-button { display: flex; justify-content: flex-start; min-height: 44px; }
+.login-card .status.show { margin-top: 12px; }
+.login-help { display: flex; align-items: flex-start; gap: 8px; margin-top: 15px; padding-top: 14px; border-top: 1px solid var(--border); color: var(--muted); font-size: 11px; }
+.login-help::before { content: "🔒"; font-size: 12px; }
+.floating-card { position: absolute; display: none; padding: 11px 13px; border: 1px solid var(--border); border-radius: 13px; background: rgba(255,255,255,.92); box-shadow: 0 14px 35px rgba(21,55,47,.12); backdrop-filter: blur(10px); }
+.floating-card strong { display: block; font-size: 13px; }
+.floating-card span { color: var(--muted); font-size: 10px; }
+.floating-one { left: -55px; top: -38px; }
+.floating-two { right: -48px; bottom: -35px; }
 
-.login-card p {
-  margin: 0 0 24px;
-  color: var(--muted);
-}
+.landing-section { padding: 72px 0; }
+.landing-section.alt { background: #eaf4f1; }
+.section-heading { max-width: 690px; margin-bottom: 34px; }
+.section-heading.center { margin-right: auto; margin-left: auto; text-align: center; }
+.section-label { margin: 0 0 7px; color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: .05em; }
+.section-heading h2 { margin: 0; font-size: clamp(28px, 6vw, 42px); line-height: 1.2; letter-spacing: -.035em; }
+.section-heading p { margin: 11px 0 0; color: var(--muted); }
+.feature-grid { display: grid; gap: 14px; }
+.feature-card { position: relative; overflow: hidden; min-height: 215px; padding: 23px; border: 1px solid var(--border); border-radius: 20px; background: #fff; box-shadow: 0 10px 30px rgba(21,55,47,.06); }
+.feature-card::after { content: ""; position: absolute; width: 110px; height: 110px; right: -44px; bottom: -50px; border-radius: 50%; background: var(--accent-soft); }
+.feature-icon { display: grid; width: 42px; height: 42px; place-items: center; margin-bottom: 32px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); font-size: 17px; font-weight: 700; }
+.feature-card h3 { margin: 0 0 6px; font-size: 18px; }
+.feature-card p { margin: 0; color: var(--muted); font-size: 13px; }
 
-.google-signin-button {
-  display: flex;
-  justify-content: center;
-  min-height: 44px;
-}
+.steps-grid { display: grid; gap: 12px; counter-reset: steps; }
+.step-card { counter-increment: steps; display: grid; grid-template-columns: 50px 1fr; gap: 15px; align-items: start; padding: 18px; border-radius: 17px; background: rgba(255,255,255,.68); border: 1px solid rgba(189,207,202,.8); }
+.step-card::before { content: "0" counter(steps); display: grid; width: 50px; height: 50px; place-items: center; border-radius: 14px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; }
+.step-card h3 { margin: 2px 0 3px; font-size: 17px; }
+.step-card p { margin: 0; color: var(--muted); font-size: 13px; }
+
+.landing-cta { padding: 72px 0 82px; }
+.cta-card { position: relative; overflow: hidden; padding: 36px 24px; text-align: center; border-radius: 25px; background: var(--text); color: #fff; box-shadow: 0 24px 60px rgba(21,55,47,.2); }
+.cta-card::before, .cta-card::after { content: ""; position: absolute; width: 230px; height: 230px; border: 1px solid rgba(255,255,255,.09); border-radius: 50%; }
+.cta-card::before { left: -120px; top: -140px; }
+.cta-card::after { right: -100px; bottom: -165px; }
+.cta-card h2 { position: relative; margin: 0; font-size: clamp(27px, 6vw, 40px); }
+.cta-card p { position: relative; margin: 10px auto 22px; max-width: 560px; color: #b8cbc6; }
+.cta-button { position: relative; display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 10px 19px; border-radius: 12px; background: #fff; color: var(--accent-strong); text-decoration: none; font-weight: 700; }
+.landing-footer { padding: 0 0 28px; text-align: center; color: var(--muted); font-size: 11px; }
 
 .topbar {
   position: sticky;
@@ -85,337 +165,309 @@ button, input, select {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  padding: 16px 24px;
-  background: rgba(247, 244, 255, 0.86);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(223, 208, 255, 0.8);
-}
-
-.brand {
-  font-weight: 700;
-  font-size: 22px;
-}
-
-.brand small {
-  display: block;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--muted);
-}
-
-.userbox {
-  display: flex;
-  align-items: center;
   gap: 12px;
+  min-height: 64px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
 }
 
-.username {
-  font-size: 14px;
-  color: var(--muted);
-}
+.brand { font-weight: 700; font-size: 20px; line-height: 1.2; }
+.brand small { display: block; margin-top: 2px; font-size: 11px; font-weight: 500; color: var(--muted); }
+.userbox { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.username { display: none; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.container {
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 24px;
-}
-
-.hero {
-  display: grid;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.hero h2 {
-  margin: 0;
-  font-size: 28px;
-}
-
-.hero p {
-  margin: 0;
-  color: var(--muted);
-}
+.container { max-width: 1120px; margin: 0 auto; padding: 18px 14px 32px; }
+.hero { margin-bottom: 16px; }
+.hero h2 { margin: 0; font-size: clamp(23px, 6vw, 32px); letter-spacing: -.025em; }
+.hero p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
 
 .tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-bottom: 14px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .75);
 }
 
 .tab-btn, .btn {
+  min-height: 44px;
   border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 10px 16px;
+  border-radius: 11px;
+  padding: 9px 14px;
   background: var(--surface);
   color: var(--text);
-  cursor: pointer;
-  transition: 0.18s ease;
+  font-weight: 600;
+  transition: border-color .18s ease, background .18s ease, transform .18s ease, box-shadow .18s ease;
 }
 
-.tab-btn.active, .btn-primary {
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: #fff;
-  border-color: transparent;
-}
+.tab-btn { border-color: transparent; background: transparent; font-size: 13px; }
+.tab-btn.active { background: var(--surface); color: var(--accent-strong); box-shadow: 0 2px 10px rgba(21, 55, 47, .09); }
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-primary:hover:not(:disabled) { background: var(--accent-strong); border-color: var(--accent-strong); }
+.btn-secondary:hover { border-color: var(--border-strong); background: var(--surface-2); }
+.btn:focus-visible, .tab-btn:focus-visible, input:focus-visible, select:focus-visible, .dropzone:focus-within { outline: 3px solid rgba(11, 115, 95, .22); outline-offset: 2px; }
+.btn:disabled { cursor: not-allowed; opacity: .48; }
 
-.btn:hover, .tab-btn:hover {
-  transform: translateY(-1px);
-}
-
-.btn-secondary {
-  background: var(--surface);
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  gap: 20px;
-}
-
-.panel {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 20px;
-}
-
-.panel h3 {
-  margin: 0 0 16px;
-  font-size: 20px;
-}
-
-.stack {
-  display: grid;
-  gap: 14px;
-}
-
-.field {
-  display: grid;
-  gap: 6px;
-}
-
-.field label {
-  font-size: 13px;
-  font-weight: 700;
-}
+.grid { display: grid; gap: 14px; }
+.panel { padding: 17px 15px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+.panel h3 { margin: 0; font-size: 19px; letter-spacing: -.015em; }
+.panel-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 15px; }
+.step-number { display: grid; flex: 0 0 30px; height: 30px; place-items: center; border-radius: 9px; background: var(--accent-soft); color: var(--accent-strong); font-size: 13px; font-weight: 700; }
+.panel-subtitle { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+.stack { display: grid; gap: 13px; }
+.field { display: grid; gap: 5px; min-width: 0; }
+.field label, .field-label { font-size: 13px; font-weight: 700; }
+.required { color: var(--danger); }
 
 .field input, .field select {
   width: 100%;
-  border: 1px solid var(--border);
+  min-height: 44px;
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
-  background: var(--surface-2);
+  background: var(--surface);
   color: var(--text);
-  padding: 11px 12px;
+  padding: 9px 11px;
 }
 
-.date-grid,
-.search-grid {
+.field input::placeholder { color: #8a9b96; }
+.field input[readonly] { background: var(--surface-2); color: var(--muted); }
+.date-grid, .search-grid, .activity-row { display: grid; gap: 10px; }
+.date-grid { grid-template-columns: 1fr 1fr; }
+.date-grid .field:last-child { grid-column: 1 / -1; }
+
+.activity-block {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
+  padding: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
 }
 
-.search-grid.four {
-  grid-template-columns: repeat(4, 1fr);
-}
-
-.activity-row {
-  display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 10px;
-}
+.activity-block-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.activity-block-head .hint { text-align: right; }
 
 .dropzone {
-  border: 2px dashed #b798ff;
-  border-radius: var(--radius);
-  background: linear-gradient(180deg, #faf7ff, #f3edff);
-  padding: 22px;
-  text-align: center;
   position: relative;
-}
-
-.dropzone input {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.dropzone strong {
-  display: block;
-  margin-bottom: 6px;
-}
-
-.file-list {
+  min-height: 126px;
   display: grid;
-  gap: 8px;
-}
-
-.file-item {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  gap: 10px;
-  align-items: center;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-}
-
-.hint, .micro {
-  color: var(--muted);
-}
-
-.hint {
-  font-size: 13px;
-}
-
-.micro {
-  font-size: 12px;
-}
-
-.row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.status {
-  border-radius: 14px;
-  padding: 12px 14px;
-  font-size: 14px;
-  display: none;
-}
-
-.status.show { display: block; }
-.status.info { background: #f3edff; border: 1px solid var(--border); }
-.status.success { background: #f0fdf4; border: 1px solid #bbf7d0; color: var(--success); }
-.status.error { background: #fff1f2; border: 1px solid #fecdd3; color: var(--danger); }
-
-.search-results {
-  display: grid;
-  gap: 12px;
-}
-
-.result-card {
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: var(--surface);
-  padding: 16px;
-  display: grid;
-  gap: 10px;
-}
-
-.result-head {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: start;
-}
-
-.result-title {
-  margin: 0;
-  font-size: 18px;
-}
-
-.pill-row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.pill {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 4px 10px;
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.result-actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.overlay {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: rgba(37, 20, 60, 0.45);
-  padding: 24px;
-}
-
-.overlay.show { display: flex; }
-
-.overlay-card {
-  width: min(420px, 100%);
-  background: var(--surface);
-  border-radius: 24px;
-  padding: 24px;
-  border: 1px solid var(--border);
+  place-content: center;
+  padding: 18px;
   text-align: center;
+  border: 2px dashed #7fb9aa;
+  border-radius: 15px;
+  background: var(--accent-soft);
+  transition: border-color .18s ease, background .18s ease;
 }
 
-.progress {
-  height: 10px;
-  border-radius: 999px;
-  background: #eee7ff;
-  overflow: hidden;
-  margin-top: 12px;
+.dropzone:hover { border-color: var(--accent); background: #ddf0eb; }
+.dropzone input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.dropzone-icon { width: 38px; height: 38px; margin: 0 auto 7px; color: var(--accent); }
+.dropzone strong { display: block; margin-bottom: 3px; font-size: 15px; }
+
+.file-list { display: grid; gap: 7px; }
+.file-item { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; padding: 8px 9px; border-radius: 11px; background: var(--surface-2); border: 1px solid var(--border); font-size: 13px; }
+.file-item > div:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-item .btn { min-height: 36px; padding: 5px 10px; font-size: 12px; }
+.hint, .micro { color: var(--muted); }
+.hint { font-size: 12px; }
+.micro { font-size: 11px; }
+
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.form-actions { padding-top: 3px; }
+.form-actions .btn-primary { flex: 1 1 190px; }
+
+.status { display: none; border-radius: 12px; padding: 10px 12px; font-size: 13px; }
+.status.show { display: block; }
+.status.info { background: #edf5ff; border: 1px solid #bed8f4; color: #245a85; }
+.status.success { background: #ecf8f1; border: 1px solid #b7e1c8; color: var(--success); }
+.status.error { background: #fff0f2; border: 1px solid #fac0ca; color: var(--danger); }
+
+.notice-panel { box-shadow: none; background: #f8fbfa; }
+.notice-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.notice-list li { position: relative; padding-left: 21px; color: var(--muted); font-size: 13px; }
+.notice-list li::before { content: "✓"; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+
+.search-results { display: grid; gap: 10px; }
+.result-card { display: grid; gap: 9px; padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+.result-head { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
+.result-title { margin: 0 0 6px; font-size: 16px; }
+.pill-row { display: flex; gap: 5px; flex-wrap: wrap; }
+.pill { padding: 3px 8px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); font-size: 11px; }
+.result-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.result-actions .btn { flex: 1 1 120px; text-align: center; text-decoration: none; }
+
+.overlay { position: fixed; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(13, 42, 35, .56); }
+.overlay.show { display: flex; }
+.overlay-card { width: min(400px, 100%); padding: 22px; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); }
+.overlay-card h3 { margin: 0 0 6px; }
+.progress { height: 8px; margin-top: 14px; overflow: hidden; border-radius: 999px; background: var(--accent-soft); }
+.progress-fill { height: 100%; width: 0%; background: var(--accent); transition: width .2s ease; }
+
+@media (min-width: 560px) {
+  .landing-wrap { width: min(1160px, calc(100% - 48px)); }
+  .landing-nav { min-height: 78px; }
+  .feature-grid { grid-template-columns: repeat(3, 1fr); }
+  .steps-grid { grid-template-columns: repeat(3, 1fr); }
+  .step-card { display: block; padding: 22px; }
+  .step-card::before { margin-bottom: 25px; }
+  .cta-card { padding: 54px 34px; }
+  .container { padding: 22px 20px 40px; }
+  .username { display: block; max-width: 250px; }
+  .date-grid { grid-template-columns: repeat(3, 1fr); }
+  .date-grid .field:last-child { grid-column: auto; }
+  .activity-row { grid-template-columns: .9fr 1.4fr; }
+  .search-grid { grid-template-columns: repeat(3, 1fr); }
+  .search-grid.four { grid-template-columns: repeat(4, 1fr); }
+  .panel { padding: 20px; }
 }
 
-.progress-fill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  transition: width 0.2s ease;
+@media (min-width: 900px) {
+  .landing-links { display: flex; }
+  .landing-hero { grid-template-columns: minmax(0, 1.35fr) minmax(360px, .85fr); gap: 70px; padding: 64px 0 94px; }
+  .hero-copy h1 { font-size: 66px; }
+  .floating-card { display: block; }
+  .landing-section { padding: 92px 0; }
+  .topbar { padding: 10px 24px; }
+  .hero { margin-bottom: 18px; }
+  .tabs { width: max-content; min-width: 440px; }
+  .grid { grid-template-columns: minmax(0, 1.65fr) minmax(280px, .8fr); gap: 16px; align-items: start; }
+  #tab-search .grid { grid-template-columns: minmax(0, 1.35fr) minmax(330px, .85fr); }
+  .notice-panel { position: sticky; top: 82px; }
 }
 
-@media (max-width: 900px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 559px) {
+  .landing-nav-cta { display: none; }
+  .landing-hero { min-height: auto; padding: 46px 0 64px; }
+  .hero-copy h1 { font-size: 40px; }
+  .login-card { padding: 21px; }
+  .landing-section { padding: 60px 0; }
+  .brand small { display: none; }
+  .topbar .btn { min-height: 40px; padding: 7px 11px; font-size: 12px; }
+  .hero p { max-width: 35ch; }
+  .row .btn { flex: 1 1 120px; }
+  .activity-block-head { display: block; }
+  .activity-block-head .hint { margin-top: 2px; text-align: left; }
 }
 
-@media (max-width: 720px) {
-  .date-grid,
-  .search-grid,
-  .search-grid.four,
-  .activity-row {
-    grid-template-columns: 1fr;
-  }
-
-  .result-head {
-    flex-direction: column;
-  }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
 }
 </style>
 </head>
 <body>
 <div class="shell">
-  <section class="login-screen" id="loginScreen">
-    <div class="login-card">
-      <h1>PICMHS2</h1>
-      <p>ระบบอัปโหลดและค้นหาภาพกิจกรรมภายในองค์กร</p>
-      <div class="google-signin-button" id="googleSignInButton"></div>
-      <div id="loginStatus" class="status"></div>
-      <p class="micro" style="margin-top:16px">อนุญาตเฉพาะอีเมลที่อยู่ใน allowed list</p>
-    </div>
+  <section class="landing-screen" id="loginScreen">
+    <nav class="landing-nav landing-wrap" aria-label="เมนูหน้าแรก">
+      <a class="landing-brand" href="#หน้าแรก" aria-label="PICMHS2 หน้าแรก">
+        <span class="landing-brand-mark">PIC</span>
+        <span>PICMHS2</span>
+      </a>
+      <div class="landing-links">
+        <a href="#จุดเด่น">จุดเด่น</a>
+        <a href="#วิธีใช้งาน">วิธีใช้งาน</a>
+        <a href="#เข้าสู่ระบบ">สำหรับผู้ใช้งาน</a>
+      </div>
+      <a class="landing-nav-cta" href="#เข้าสู่ระบบ">เข้าสู่ระบบ</a>
+    </nav>
+
+    <header class="landing-hero landing-wrap" id="หน้าแรก">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-dot"></span>คลังภาพกิจกรรมภายในองค์กร</div>
+        <h1>ทุกภาพกิจกรรม<br><span>ค้นเจอได้ในไม่กี่วินาที</span></h1>
+        <p>จัดเก็บ ค้นหา และเพิ่มภาพกิจกรรมอย่างเป็นระบบ เชื่อมต่อกับ Google Drive ที่ทีมงานคุ้นเคย</p>
+        <ul class="hero-points">
+          <li>อัปโหลดหลายไฟล์พร้อมกัน</li>
+          <li>ค้นหาด้วยวันที่และชื่อกิจกรรม</li>
+          <li>เก็บไฟล์ในพื้นที่ขององค์กร</li>
+        </ul>
+      </div>
+
+      <div class="hero-visual" id="เข้าสู่ระบบ">
+        <div class="floating-card floating-one"><strong>ค้นหาได้ทันที</strong><span>แยกตามหมวดและวันที่</span></div>
+        <div class="login-card">
+          <p class="login-card-kicker">พื้นที่สำหรับเจ้าหน้าที่</p>
+          <h2>เริ่มจัดการภาพกิจกรรม</h2>
+          <p>เข้าสู่ระบบด้วยบัญชี Google ที่ได้รับอนุญาต</p>
+          <div class="google-signin-button" id="googleSignInButton"></div>
+          <div id="loginStatus" class="status" role="status" aria-live="polite"></div>
+          <div class="login-help">ระบบขอสิทธิ์เฉพาะที่จำเป็นสำหรับอัปโหลดไฟล์ และเปิดให้ใช้เฉพาะอีเมลในรายชื่อผู้ได้รับอนุญาต</div>
+        </div>
+        <div class="floating-card floating-two"><strong>เพิ่มไฟล์ได้เสมอ</strong><span>กลับมาเติมภาพในกิจกรรมเดิม</span></div>
+      </div>
+    </header>
+
+    <section class="landing-section" id="จุดเด่น">
+      <div class="landing-wrap">
+        <div class="section-heading">
+          <p class="section-label">ทำงานง่ายขึ้น</p>
+          <h2>ภาพกิจกรรมเป็นระเบียบ<br>ตั้งแต่วันที่อัปโหลด</h2>
+          <p>ลดเวลาตามหาไฟล์จากหลายโฟลเดอร์ และช่วยให้ทุกคนใช้โครงสร้างเดียวกัน</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card">
+            <div class="feature-icon">↑</div>
+            <h3>อัปโหลดครั้งเดียว</h3>
+            <p>เลือกหลายภาพหรือวิดีโอพร้อมกัน ระบบจัดเก็บลงโฟลเดอร์ตามหมวดและวันที่ให้อัตโนมัติ</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon">⌕</div>
+            <h3>ค้นหาอย่างตรงจุด</h3>
+            <p>กรองด้วยปี เดือน วัน หมวดกิจกรรม ชื่อกิจกรรม หรือชื่อผู้อัปโหลดได้ในหน้าเดียว</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon">＋</div>
+            <h3>เพิ่มไฟล์ภายหลัง</h3>
+            <p>ค้นหากิจกรรมเดิมแล้วเพิ่มภาพใหม่เข้าโฟลเดอร์เดิม โดยไม่ต้องสร้างรายการซ้ำ</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section alt" id="วิธีใช้งาน">
+      <div class="landing-wrap">
+        <div class="section-heading center">
+          <p class="section-label">สามขั้นตอน</p>
+          <h2>เริ่มต้นได้ทันที ไม่ต้องเรียนรู้ระบบใหม่</h2>
+          <p>ออกแบบมาให้เจ้าหน้าที่ใช้งานได้สะดวกทั้งบนโทรศัพท์และคอมพิวเตอร์</p>
+        </div>
+        <div class="steps-grid">
+          <article class="step-card">
+            <div><h3>เข้าสู่ระบบ</h3><p>ใช้บัญชี Google ที่อยู่ในรายชื่อผู้ได้รับอนุญาตขององค์กร</p></div>
+          </article>
+          <article class="step-card">
+            <div><h3>กรอกข้อมูลกิจกรรม</h3><p>เลือกหมวด วันที่ และระบุชื่อกิจกรรมที่ค้นหาเข้าใจง่าย</p></div>
+          </article>
+          <article class="step-card">
+            <div><h3>เลือกไฟล์แล้วอัปโหลด</h3><p>ระบบจัดเก็บไฟล์และบันทึกข้อมูลสำหรับการค้นหาโดยอัตโนมัติ</p></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-cta">
+      <div class="landing-wrap">
+        <div class="cta-card">
+          <h2>พร้อมจัดระเบียบภาพกิจกรรมแล้วหรือยัง?</h2>
+          <p>เข้าสู่ระบบเพื่อสร้างกิจกรรมใหม่ ค้นหาภาพเดิม หรือเพิ่มไฟล์เข้าคลังขององค์กร</p>
+          <a class="cta-button" href="#เข้าสู่ระบบ">เข้าสู่ระบบเพื่อเริ่มใช้งาน</a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="landing-footer landing-wrap">PICMHS2 · ระบบจัดการภาพกิจกรรมภายในองค์กร</footer>
   </section>
 
   <section class="hidden" id="appShell">
     <header class="topbar">
       <div class="brand">
         PICMHS2
-        <small>Google Drive + Sheets + Apps Script</small>
+        <small>คลังภาพกิจกรรมสำนักงาน</small>
       </div>
       <div class="userbox">
         <div class="username" id="userText">-</div>
@@ -425,8 +477,8 @@ button, input, select {
 
     <main class="container">
       <div class="hero">
-        <h2>อัปโหลดและค้นหากิจกรรม</h2>
-        <p>รองรับสร้างกิจกรรมใหม่ ค้นหากิจกรรมเดิม และอัปโหลดเพิ่มเข้าโฟลเดอร์เดิม</p>
+        <h2>จัดการภาพกิจกรรม</h2>
+        <p>สร้างกิจกรรมใหม่ หรือค้นหากิจกรรมเดิมเพื่อเพิ่มไฟล์</p>
       </div>
 
       <div class="tabs">
@@ -437,68 +489,88 @@ button, input, select {
       <section id="tab-upload">
         <div class="grid">
           <div class="panel">
-            <h3>สร้างกิจกรรมใหม่</h3>
+            <div class="panel-head">
+              <span class="step-number">1</span>
+              <div>
+                <h3>สร้างกิจกรรมใหม่</h3>
+                <p class="panel-subtitle">กรอกข้อมูลให้ครบ แล้วเลือกภาพหรือวิดีโอที่ต้องการอัปโหลด</p>
+              </div>
+            </div>
             <div class="stack">
-              <div id="uploadStatus" class="status info">พร้อมเริ่มต้น</div>
+              <div id="uploadStatus" class="status" role="status" aria-live="polite"></div>
 
               <div class="field">
-                <label for="category">หมวด</label>
+                <label for="category">หมวดกิจกรรม <span class="required" aria-hidden="true">*</span></label>
                 <select id="category"></select>
               </div>
 
               <div class="date-grid">
                 <div class="field">
-                  <label for="yearBE">ปี</label>
+                  <label for="yearBE">ปี พ.ศ. <span class="required" aria-hidden="true">*</span></label>
                   <select id="yearBE"></select>
                 </div>
                 <div class="field">
-                  <label for="month">เดือน</label>
+                  <label for="month">เดือน <span class="required" aria-hidden="true">*</span></label>
                   <select id="month"></select>
                 </div>
                 <div class="field">
-                  <label for="day">วัน</label>
+                  <label for="day">วัน <span class="required" aria-hidden="true">*</span></label>
                   <select id="day">
                     <option value="">เลือกวัน</option>
                   </select>
                 </div>
               </div>
 
-              <div class="activity-row">
-                <div class="field">
-                  <label for="activityPreset">ชื่อกิจกรรมแบบเร็ว</label>
-                  <select id="activityPreset"></select>
+              <div class="activity-block">
+                <div class="activity-block-head">
+                  <span class="field-label">ชื่อกิจกรรม <span class="required" aria-hidden="true">*</span></span>
+                  <span class="hint">เลือกชื่อที่ใช้บ่อย หรือพิมพ์เอง</span>
                 </div>
-                <div class="field">
-                  <label for="activityName">ชื่อกิจกรรม</label>
-                  <input id="activityName" type="text" placeholder="พิมพ์ชื่อกิจกรรม">
+                <div class="activity-row">
+                  <div class="field">
+                    <label for="activityPreset">ชื่อที่ใช้บ่อย (ไม่บังคับ)</label>
+                    <select id="activityPreset"></select>
+                  </div>
+                  <div class="field">
+                    <label for="activityName">ชื่อกิจกรรมที่จะบันทึก</label>
+                    <input id="activityName" type="text" placeholder="เช่น ประชุมประจำเดือน">
+                  </div>
                 </div>
+                <div class="hint">เมื่อเลือกชื่อที่ใช้บ่อย ระบบจะเติมลงในช่องชื่อกิจกรรม และแก้ไขต่อได้</div>
               </div>
 
               <div class="field">
-                <label>ไฟล์</label>
+                <label for="fileInput">ไฟล์ภาพหรือวิดีโอ <span class="required" aria-hidden="true">*</span></label>
                 <div class="dropzone" id="dropZone">
                   <input id="fileInput" type="file" multiple accept="image/*,video/*,.heic,.heif">
-                  <strong>ลากไฟล์มาวาง หรือกดเพื่อเลือกไฟล์</strong>
-                  <div class="hint">รองรับรูปเป็นหลัก และวิดีโอได้เป็นกรณีพิเศษ</div>
+                  <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg>
+                  <strong>แตะเพื่อเลือกหลายไฟล์</strong>
+                  <div class="hint">หรือลากไฟล์มาวางเมื่อใช้คอมพิวเตอร์</div>
                 </div>
               </div>
 
               <div class="file-list" id="fileList"></div>
 
-              <div class="row">
+              <div class="row form-actions">
                 <button class="btn btn-primary" id="btnUploadNew" disabled>อัปโหลดกิจกรรมใหม่</button>
                 <button class="btn btn-secondary" id="btnClearNew">ล้างฟอร์ม</button>
               </div>
             </div>
           </div>
 
-          <div class="panel">
-            <h3>หมายเหตุ MVP</h3>
-            <div class="stack">
-              <div class="hint">กรณีแก้ชื่อกิจกรรม ย้ายไฟล์ หรือลบไฟล์ ให้ทำ manual ใน Drive/Sheets ก่อน</div>
-              <div class="hint">กรณีอัปเพิ่มเข้ากิจกรรมเดิม ให้ใช้แท็บค้นหาแล้วกด “อัปโหลดเพิ่ม”</div>
-              <div class="hint">allowed users และ activity presets จัดการจาก Google Sheets ได้</div>
+          <div class="panel notice-panel">
+            <div class="panel-head">
+              <span class="step-number">i</span>
+              <div>
+                <h3>ก่อนอัปโหลด</h3>
+                <p class="panel-subtitle">ตรวจสอบข้อมูลเพื่อให้ค้นหาได้ง่ายภายหลัง</p>
+              </div>
             </div>
+            <ul class="notice-list">
+              <li>เลือกวันที่และชื่อกิจกรรมให้ตรงกับงาน</li>
+              <li>เพิ่มไฟล์เข้ากิจกรรมเดิมได้จากแท็บค้นหา</li>
+              <li>การแก้ชื่อ ย้าย หรือลบไฟล์ ให้จัดการใน Google Drive และ Google ชีต</li>
+            </ul>
           </div>
         </div>
       </section>
@@ -506,9 +578,15 @@ button, input, select {
       <section id="tab-search" class="hidden">
         <div class="grid">
           <div class="panel">
-            <h3>ค้นหากิจกรรม</h3>
+            <div class="panel-head">
+              <span class="step-number">1</span>
+              <div>
+                <h3>ค้นหากิจกรรม</h3>
+                <p class="panel-subtitle">เลือกเฉพาะเงื่อนไขที่ทราบ แล้วกดค้นหา</p>
+              </div>
+            </div>
             <div class="stack">
-              <div id="searchStatus" class="status info">กรองข้อมูลแล้วกดค้นหา</div>
+              <div id="searchStatus" class="status" role="status" aria-live="polite"></div>
 
               <div class="search-grid four">
                 <div class="field">
@@ -548,19 +626,26 @@ button, input, select {
           </div>
 
           <div class="panel">
-            <h3>อัปโหลดเพิ่มเข้ากิจกรรมเดิม</h3>
+            <div class="panel-head">
+              <span class="step-number">2</span>
+              <div>
+                <h3>อัปโหลดเพิ่ม</h3>
+                <p class="panel-subtitle">เลือกกิจกรรมจากผลค้นหาก่อน แล้วจึงเลือกไฟล์</p>
+              </div>
+            </div>
             <div class="stack">
-              <div id="appendStatus" class="status info">เลือกกิจกรรมจากผลค้นหาก่อน</div>
+              <div id="appendStatus" class="status" role="status" aria-live="polite"></div>
               <div class="field">
-                <label>กิจกรรมที่เลือก</label>
+                <label for="appendTarget">กิจกรรมที่เลือก</label>
                 <input id="appendTarget" type="text" readonly placeholder="ยังไม่ได้เลือกกิจกรรม">
               </div>
               <div class="field">
-                <label>ไฟล์ที่ต้องการอัปเพิ่ม</label>
+                <label for="appendFileInput">ไฟล์ที่ต้องการอัปเพิ่ม</label>
                 <div class="dropzone">
                   <input id="appendFileInput" type="file" multiple accept="image/*,video/*,.heic,.heif">
-                  <strong>เลือกไฟล์เพื่ออัปเพิ่ม</strong>
-                  <div class="hint">ระบบจะอัปเข้าโฟลเดอร์เดิมของกิจกรรมนั้น</div>
+                  <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg>
+                  <strong>แตะเพื่อเลือกไฟล์</strong>
+                  <div class="hint">ระบบจะเพิ่มไฟล์เข้าโฟลเดอร์เดิม</div>
                 </div>
               </div>
               <div class="file-list" id="appendFileList"></div>
@@ -639,13 +724,17 @@ function seedStaticFields() {
   fillDaySelect(document.getElementById("searchDay"), true, 31);
 
   const preset = document.getElementById("activityPreset");
-  preset.innerHTML = '<option value="">เลือก preset หรือพิมพ์เอง</option>' +
+  preset.innerHTML = '<option value="">พิมพ์ชื่อเอง</option>' +
     CONFIG.ACTIVITY_PRESETS.map((item) => `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`).join("");
   preset.addEventListener("change", () => {
     if (preset.value) {
       document.getElementById("activityName").value = preset.value;
       validateNewUpload();
     }
+  });
+
+  document.getElementById("activityName").addEventListener("input", (event) => {
+    if (event.target.value !== preset.value) preset.value = "";
   });
 }
 
@@ -792,9 +881,9 @@ function showAppShell() {
   document.getElementById("loginScreen").classList.add("hidden");
   document.getElementById("appShell").classList.remove("hidden");
   document.getElementById("userText").textContent = `${state.currentUser.name} (${state.currentUser.email})`;
-  showStatus("uploadStatus", "info", "พร้อมสร้างกิจกรรมใหม่");
-  showStatus("searchStatus", "info", "กรองข้อมูลแล้วกดค้นหา");
-  showStatus("appendStatus", "info", "เลือกกิจกรรมจากผลค้นหาก่อน");
+  clearStatus("uploadStatus");
+  clearStatus("searchStatus");
+  clearStatus("appendStatus");
 }
 
 function logout() {
@@ -924,7 +1013,7 @@ async function handleNewUpload() {
 
     await uploadBatch(state.newFiles, folder.folderId, "อัปโหลดกิจกรรมใหม่");
 
-    showOverlay("กำลังบันทึก metadata", 92);
+    showOverlay("กำลังบันทึกข้อมูลกิจกรรม", 92);
     await apiPost({
       action: "saveMetadata",
       idToken: await getFreshIdToken(),
@@ -957,7 +1046,7 @@ async function handleAppendUpload() {
   try {
     await uploadBatch(state.appendFiles, state.appendTarget.folderId, "อัปโหลดเพิ่ม");
 
-    showOverlay("กำลังอัปเดต metadata", 94);
+    showOverlay("กำลังอัปเดตข้อมูลกิจกรรม", 94);
     await apiPost({
       action: "appendMetadata",
       idToken: await getFreshIdToken(),
@@ -1010,7 +1099,7 @@ async function uploadFileToDrive(file, folderId) {
 
   if (!initRes.ok) throw new Error(`เริ่มอัปโหลดไม่สำเร็จ (${initRes.status})`);
   const uploadUrl = initRes.headers.get("Location");
-  if (!uploadUrl) throw new Error("Drive ไม่คืน upload URL");
+  if (!uploadUrl) throw new Error("Google Drive ไม่ส่งที่อยู่อัปโหลดกลับมา");
 
   const uploadRes = await fetch(uploadUrl, {
     method: "PUT",
@@ -1179,7 +1268,7 @@ async function apiPost(body) {
     });
   } catch (error) {
     if (error.name === "AbortError") {
-      throw new Error("Apps Script ไม่ตอบสนองภายใน 30 วินาที กรุณาตรวจสอบ Web App deployment");
+      throw new Error("Apps Script ไม่ตอบสนองภายใน 30 วินาที กรุณาตรวจสอบการเผยแพร่เว็บแอป");
     }
     throw new Error("เชื่อมต่อ Apps Script ไม่สำเร็จ: " + error.message);
   } finally {
@@ -1204,6 +1293,12 @@ function showStatus(id, type, text) {
   const el = document.getElementById(id);
   el.className = `status ${type} show`;
   el.textContent = text;
+}
+
+function clearStatus(id) {
+  const el = document.getElementById(id);
+  el.className = "status";
+  el.textContent = "";
 }
 
 function escapeHtml(value) {
