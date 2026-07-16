@@ -333,8 +333,13 @@ button, select { cursor: pointer; }
 .result-title { margin: 0 0 6px; font-size: 16px; }
 .pill-row { display: flex; gap: 5px; flex-wrap: wrap; }
 .pill { padding: 3px 8px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); font-size: 11px; }
+.pill.internal { border-color: #efd499; background: var(--warning-soft); color: var(--warning); }
+.pill.readonly { border-color: #c9d8e6; background: #edf5ff; color: var(--info); }
+.pill.archived { border-color: #fac0ca; background: #fff0f2; color: var(--danger); }
 .result-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .result-actions .btn { flex: 1 1 120px; text-align: center; text-decoration: none; }
+.check-field { display: flex; align-items: center; gap: 8px; min-height: 44px; color: var(--muted); font-size: 13px; }
+.check-field input { width: 18px; height: 18px; }
 
 .admin-grid { display: grid; gap: 16px; }
 .user-list { display: grid; gap: 9px; }
@@ -353,6 +358,10 @@ button, select { cursor: pointer; }
 .overlay { position: fixed; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(13, 42, 35, .56); }
 .overlay.show { display: flex; }
 .overlay-card { width: min(400px, 100%); padding: 22px; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); outline: none; }
+.overlay-card.manage-card { width: min(680px, 100%); max-height: calc(100vh - 40px); overflow: auto; text-align: left; }
+.manage-card .date-grid { margin-top: 12px; }
+.manage-card .row { margin-top: 16px; }
+.manage-card .btn-danger { margin-left: auto; border-color: #fac0ca; color: var(--danger); background: #fff0f2; }
 .overlay-card h3 { margin: 0 0 6px; }
 .progress { height: 8px; margin-top: 14px; overflow: hidden; border-radius: 999px; background: var(--accent-soft); }
 .progress-fill { height: 100%; width: 0%; background: var(--accent); transition: width .2s ease; }
@@ -634,6 +643,15 @@ button, select { cursor: pointer; }
               </div>
 
               <div class="field">
+                <label for="visibility">การเผยแพร่ <span class="required" aria-hidden="true">*</span></label>
+                <select id="visibility">
+                  <option value="public" selected>เผยแพร่และบุคคลทั่วไปค้นหาได้</option>
+                  <option value="internal">ไม่เผยแพร่ แสดงเฉพาะผู้ใช้งานระบบ</option>
+                </select>
+                <div class="hint">แบบไม่เผยแพร่เป็นรายการ unlisted; ผู้ที่มีลิงก์ Drive เดิมยังเปิดได้</div>
+              </div>
+
+              <div class="field">
                 <label for="fileInput">ไฟล์ภาพหรือวิดีโอ <span class="required" aria-hidden="true">*</span></label>
                 <div class="dropzone" id="dropZone">
                   <input id="fileInput" type="file" multiple accept="image/*,video/*,.heic,.heif">
@@ -688,7 +706,7 @@ button, select { cursor: pointer; }
                   <select id="searchCategory"></select>
                 </div>
                 <div class="field">
-                  <label for="searchYear">ปี</label>
+                  <label for="searchYear">ปี <span class="required" aria-hidden="true">*</span></label>
                   <select id="searchYear"></select>
                 </div>
                 <div class="field">
@@ -715,8 +733,12 @@ button, select { cursor: pointer; }
                 </div>
               </div>
 
+              <label class="check-field hidden" id="archivedFilterWrap">
+                <input id="searchArchived" type="checkbox"> แสดงรายการที่ลบแล้วสำหรับกู้คืน (Admin)
+              </label>
+
               <div class="search-results" id="searchResults">
-                <div class="empty-state"><strong>เริ่มค้นหากิจกรรม</strong>เลือกตัวกรองเท่าที่ทราบ หรือกดค้นหาเพื่อดูรายการทั้งหมด</div>
+                <div class="empty-state"><strong>เริ่มค้นหากิจกรรม</strong>เลือกปีที่ต้องการก่อนค้นหา ตัวกรองอื่นไม่บังคับ</div>
               </div>
             </div>
           </div>
@@ -806,6 +828,26 @@ button, select { cursor: pointer; }
   </section>
 </div>
 
+<div class="overlay" id="activityManageOverlay" role="dialog" aria-modal="true" aria-labelledby="manageTitle" aria-hidden="true">
+  <div class="overlay-card manage-card" tabindex="-1">
+    <h3 id="manageTitle">แก้ไข/ย้ายกิจกรรม</h3>
+    <div id="manageStatus" class="status" role="status" aria-live="polite"></div>
+    <div class="date-grid">
+      <div class="field"><label for="manageCategory">หมวด</label><select id="manageCategory"></select></div>
+      <div class="field"><label for="manageYear">ปี พ.ศ.</label><select id="manageYear"></select></div>
+      <div class="field"><label for="manageMonth">เดือน</label><select id="manageMonth"></select></div>
+      <div class="field"><label for="manageDay">วัน</label><select id="manageDay"></select></div>
+    </div>
+    <div class="field" style="margin-top:12px"><label for="manageName">ชื่อกิจกรรม</label><input id="manageName" maxlength="120"></div>
+    <div class="field" style="margin-top:12px"><label for="manageVisibility">การเผยแพร่</label><select id="manageVisibility"><option value="public">เผยแพร่และบุคคลทั่วไปค้นหาได้</option><option value="internal">ไม่เผยแพร่ แสดงเฉพาะผู้ใช้งานระบบ</option></select></div>
+    <div class="row">
+      <button class="btn btn-primary" id="btnSaveActivity" type="button">บันทึกการแก้ไข</button>
+      <button class="btn btn-secondary" id="btnCancelManage" type="button">ยกเลิก</button>
+      <button class="btn btn-danger" id="btnArchiveActivity" type="button">ลบกิจกรรมนี้</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="progressOverlay" role="dialog" aria-modal="true" aria-labelledby="progressTitle" aria-describedby="progressText" aria-hidden="true">
   <div class="overlay-card" tabindex="-1">
     <h3 id="progressTitle">กำลังทำงาน</h3>
@@ -821,7 +863,7 @@ button, select { cursor: pointer; }
 const CONFIG = {
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzDyucuarduxEiLv-s4mpgoeJ6cKrx77nMPlc30-tb82z3DDsLPgVcqO1zSSwV5WXBZig/exec",
   GOOGLE_CLIENT_ID: "607972424710-gftopgttfukmekf0uvufalid628vs37a.apps.googleusercontent.com",
-  UPLOAD_YEARS: [2567, 2568, 2569, 2570, 2571],
+  CURRENT_YEAR_BE: Number(new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Bangkok", year: "numeric" }).format(new Date())) + 543,
   CATEGORIES: ["กิจกรรมและอื่นๆ", "ไปราชการ", "ประชุม"],
   ACTIVITY_PRESETS: [
     "ประชุมผู้บริหาร",
@@ -842,6 +884,7 @@ const state = {
   newFiles: [],
   appendFiles: [],
   appendTarget: null,
+  manageTarget: null,
   lastFocusedElement: null
 };
 
@@ -856,6 +899,7 @@ function bootstrap() {
   bindUploadControls();
   bindAppendControls();
   bindSearchControls();
+  bindActivityManagement();
   bindAdminControls();
   bindSessionControls();
   restoreSession();
@@ -866,7 +910,7 @@ function seedStaticFields() {
   fillCategorySelect(document.getElementById("searchCategory"), true);
   fillMonthSelect(document.getElementById("month"), false);
   fillMonthSelect(document.getElementById("searchMonth"), true);
-  fillYearSelect(document.getElementById("yearBE"), false, CONFIG.UPLOAD_YEARS);
+  fillYearSelect(document.getElementById("yearBE"), false, getEditableYears());
   fillYearSelect(document.getElementById("searchYear"), true, []);
   fillDaySelect(document.getElementById("searchDay"), true, 31);
 
@@ -1008,6 +1052,7 @@ async function handleCredential(response) {
       idToken: response.credential
     });
     state.currentUser.role = initResult.role || "uploader";
+    CONFIG.CURRENT_YEAR_BE = Number(initResult.currentYearBE || CONFIG.CURRENT_YEAR_BE);
   } catch (error) {
     logout();
     showStatus("loginStatus", "error", error.message);
@@ -1040,6 +1085,7 @@ function showAppShell() {
   document.getElementById("appShell").classList.remove("hidden");
   document.getElementById("userText").textContent = `${state.currentUser.name} (${state.currentUser.email})`;
   document.getElementById("adminTabButton").classList.toggle("hidden", state.currentUser.role !== "admin");
+  document.getElementById("archivedFilterWrap").classList.toggle("hidden", state.currentUser.role !== "admin");
   clearStatus("uploadStatus");
   clearStatus("searchStatus");
   clearStatus("appendStatus");
@@ -1070,9 +1116,17 @@ function syncUploadDays() {
 }
 
 function syncSearchDays() {
-  const year = Number(document.getElementById("searchYear").value || 2568);
+  const year = Number(document.getElementById("searchYear").value || CONFIG.CURRENT_YEAR_BE);
   const month = Number(document.getElementById("searchMonth").value || 0);
   fillDaySelect(document.getElementById("searchDay"), true, month ? new Date(year - 543, month, 0).getDate() : 31);
+}
+
+function syncManageDays() {
+  const year = Number(document.getElementById("manageYear").value || CONFIG.CURRENT_YEAR_BE);
+  const month = Number(document.getElementById("manageMonth").value || 0);
+  const selected = document.getElementById("manageDay").value;
+  fillDaySelect(document.getElementById("manageDay"), false, month ? new Date(year - 543, month, 0).getDate() : 0);
+  document.getElementById("manageDay").value = selected;
 }
 
 function fillCategorySelect(el, includeAll) {
@@ -1088,10 +1142,13 @@ function fillMonthSelect(el, includeAll) {
 }
 
 function fillYearSelect(el, includeAll, years) {
-  const first = includeAll ? '<option value="">ทุกปี</option>' : '<option value="">เลือกปี</option>';
-  const currentYear = new Date().getFullYear() + 543;
-  const source = years.length ? years : CONFIG.UPLOAD_YEARS;
-  el.innerHTML = first + source.map((year) => `<option value="${year}" ${year === currentYear && !includeAll ? "selected" : ""}>${year}</option>`).join("");
+  const first = includeAll ? '<option value="">เลือกปีที่ต้องการ</option>' : '<option value="">เลือกปี</option>';
+  const source = Array.isArray(years) ? years : [];
+  el.innerHTML = first + source.map((year) => `<option value="${year}" ${Number(year) === CONFIG.CURRENT_YEAR_BE && !includeAll ? "selected" : ""}>${year}</option>`).join("");
+}
+
+function getEditableYears() {
+  return [CONFIG.CURRENT_YEAR_BE - 2, CONFIG.CURRENT_YEAR_BE - 1, CONFIG.CURRENT_YEAR_BE];
 }
 
 function fillDaySelect(el, includeAll, total) {
@@ -1185,10 +1242,11 @@ async function handleNewUpload() {
       yearBE: payload.yearBE,
       month: payload.month,
       day: payload.day,
-      activityName: payload.activityName,
+      activityName: folder.activityName,
       folderId: folder.folderId,
       folderUrl: folder.folderUrl,
       folderPath: folder.folderPath,
+      visibility: payload.visibility,
       fileCount: state.newFiles.length,
       uploadMode: "new"
     });
@@ -1309,6 +1367,12 @@ async function refreshDriveToken() {
 
 async function handleSearch() {
   const searchButton = document.getElementById("btnSearch");
+  const selectedYear = document.getElementById("searchYear").value;
+  if (!selectedYear) {
+    showStatus("searchStatus", "error", "เลือกปี พ.ศ. ก่อนค้นหา");
+    document.getElementById("searchYear").focus();
+    return;
+  }
   try {
     searchButton.disabled = true;
     searchButton.textContent = "กำลังค้นหา...";
@@ -1318,17 +1382,18 @@ async function handleSearch() {
       action: "search",
       idToken: await getFreshIdToken(),
       category: document.getElementById("searchCategory").value,
-      yearBE: document.getElementById("searchYear").value,
+      yearBE: selectedYear,
       month: document.getElementById("searchMonth").value,
       day: document.getElementById("searchDay").value,
       activityName: document.getElementById("searchActivity").value.trim(),
-      uploadedByName: document.getElementById("searchUploader").value.trim()
+      uploadedByName: document.getElementById("searchUploader").value.trim(),
+      includeArchived: state.currentUser?.role === "admin" && document.getElementById("searchArchived").checked
     });
 
     const results = result.results || [];
     renderSearchResults(results);
     if (results.length) {
-      showStatus("searchStatus", "success", `พบ ${results.length} รายการ`);
+      showStatus("searchStatus", "success", `พบ ${results.length} รายการ${result.truncated ? " (แสดงสูงสุด 50 รายการ กรุณาเพิ่มตัวกรอง)" : ""}`);
     } else {
       clearStatus("searchStatus");
     }
@@ -1348,26 +1413,62 @@ function renderSearchResults(results) {
     return;
   }
 
-  el.innerHTML = results.map((item) => `
-    <article class="result-card">
-      <div class="result-head">
-        <div>
-          <h4 class="result-title">${escapeHtml(item.activityName)}</h4>
-          <div class="pill-row">
-            <span class="pill">${escapeHtml(item.category)}</span>
-            <span class="pill">${item.day} ${escapeHtml(CONFIG.MONTHS_TH[Number(item.month)] || "")} ${item.yearBE}</span>
-            <span class="pill">${item.fileCount} ไฟล์</span>
-            <span class="pill">โดย ${escapeHtml(item.uploadedByName || "-")}</span>
-          </div>
-        </div>
-      </div>
-      <div class="micro">${escapeHtml(item.folderPath || "")}</div>
-      <div class="result-actions">
-        <a class="btn btn-secondary" href="${escapeHtml(item.folderUrl)}" target="_blank" rel="noopener noreferrer">เปิด Drive</a>
-        <button class="btn btn-primary" type="button" onclick='selectAppendTarget(${JSON.stringify(JSON.stringify(item))})'>อัปโหลดเพิ่ม</button>
-      </div>
-    </article>
-  `).join("");
+  el.replaceChildren();
+  results.forEach((item) => {
+    const card = document.createElement("article");
+    card.className = "result-card";
+    const head = document.createElement("div");
+    head.className = "result-head";
+    const content = document.createElement("div");
+    const title = document.createElement("h4");
+    title.className = "result-title";
+    title.textContent = item.activityName || "กิจกรรมไม่มีชื่อ";
+    const pills = document.createElement("div");
+    pills.className = "pill-row";
+    addResultPill(pills, item.category);
+    addResultPill(pills, `${item.day} ${CONFIG.MONTHS_TH[Number(item.month)] || ""} ${item.yearBE}`);
+    addResultPill(pills, `${item.fileCount} ไฟล์`);
+    addResultPill(pills, `โดย ${item.uploadedByName || "-"}`);
+    if (item.visibility === "internal") addResultPill(pills, "ไม่เผยแพร่", "internal");
+    if (item.isReadOnly) addResultPill(pills, "ข้อมูลย้อนหลัง — อ่านอย่างเดียว", "readonly");
+    if (item.activityStatus === "archived") addResultPill(pills, "ลบแล้ว", "archived");
+    content.append(title, pills);
+    head.appendChild(content);
+    const path = document.createElement("div");
+    path.className = "micro";
+    path.textContent = item.folderPath || "";
+    const actions = document.createElement("div");
+    actions.className = "result-actions";
+    const drive = document.createElement("a");
+    drive.className = "btn btn-secondary";
+    drive.href = item.folderUrl;
+    drive.target = "_blank";
+    drive.rel = "noopener noreferrer";
+    drive.textContent = "เปิด Drive";
+    actions.appendChild(drive);
+    if (item.canAppend) actions.appendChild(resultButton("อัปโหลดเพิ่ม", "btn-primary", () => selectAppendTarget(item)));
+    if (item.canManage) actions.appendChild(resultButton("แก้ไข/ย้ายกิจกรรม", "btn-secondary", () => openManageActivity(item)));
+    if (item.canManage) actions.appendChild(resultButton("ลบกิจกรรมนี้", "btn-secondary", () => archiveActivityItem(item, false)));
+    if (item.canRestore) actions.appendChild(resultButton("กู้คืนกิจกรรม", "btn-primary", () => restoreActivity(item)));
+    card.append(head, path, actions);
+    el.appendChild(card);
+  });
+}
+
+function addResultPill(container, text, variant = "") {
+  const pill = document.createElement("span");
+  pill.className = `pill ${variant}`.trim();
+  pill.textContent = text || "-";
+  container.appendChild(pill);
+}
+
+function resultButton(text, variant, handler) {
+  const button = document.createElement("button");
+  button.className = `btn ${variant}`;
+  button.type = "button";
+  button.textContent = text;
+  button.addEventListener("click", handler);
+  return button;
 }
 
 function renderSearchState(type) {
@@ -1387,8 +1488,8 @@ function renderSearchState(type) {
   el.appendChild(box);
 }
 
-function selectAppendTarget(raw) {
-  state.appendTarget = JSON.parse(raw);
+function selectAppendTarget(item) {
+  state.appendTarget = item;
   document.getElementById("appendTarget").value = `${state.appendTarget.activityName} | ${state.appendTarget.folderPath}`;
   document.getElementById("appendSelectedName").textContent = state.appendTarget.activityName || "กิจกรรมที่เลือก";
   document.getElementById("appendSelectedMeta").textContent = `${state.appendTarget.day} ${CONFIG.MONTHS_TH[Number(state.appendTarget.month)] || ""} ${state.appendTarget.yearBE} · ${state.appendTarget.category}`;
@@ -1398,13 +1499,119 @@ function selectAppendTarget(raw) {
   document.querySelector('[data-tab="search"]').click();
 }
 
+function openManageActivity(item) {
+  state.manageTarget = item;
+  fillYearSelect(document.getElementById("manageYear"), false, getEditableYears());
+  document.getElementById("manageCategory").value = item.category;
+  document.getElementById("manageYear").value = String(item.yearBE);
+  document.getElementById("manageMonth").value = String(item.month);
+  syncManageDays();
+  document.getElementById("manageDay").value = String(item.day);
+  document.getElementById("manageName").value = item.activityName;
+  document.getElementById("manageVisibility").value = item.visibility || "public";
+  clearStatus("manageStatus");
+  const overlay = document.getElementById("activityManageOverlay");
+  state.lastFocusedElement = document.activeElement;
+  overlay.classList.add("show");
+  overlay.setAttribute("aria-hidden", "false");
+  overlay.querySelector(".overlay-card").focus();
+}
+
+function closeManageActivity() {
+  const overlay = document.getElementById("activityManageOverlay");
+  overlay.classList.remove("show");
+  overlay.setAttribute("aria-hidden", "true");
+  state.manageTarget = null;
+  if (state.lastFocusedElement?.focus) state.lastFocusedElement.focus();
+  state.lastFocusedElement = null;
+}
+
+async function saveManagedActivity() {
+  if (!state.manageTarget) return;
+  const payload = {
+    action: "updateActivity",
+    idToken: await getFreshIdToken(),
+    uploadId: state.manageTarget.uploadId,
+    folderId: state.manageTarget.folderId,
+    category: document.getElementById("manageCategory").value,
+    yearBE: Number(document.getElementById("manageYear").value),
+    month: Number(document.getElementById("manageMonth").value),
+    day: Number(document.getElementById("manageDay").value),
+    activityName: document.getElementById("manageName").value.trim(),
+    visibility: document.getElementById("manageVisibility").value
+  };
+  if (!payload.category || !payload.yearBE || !payload.month || !payload.day || !payload.activityName) {
+    showStatus("manageStatus", "error", "กรอกข้อมูลกิจกรรมให้ครบ");
+    return;
+  }
+  const button = document.getElementById("btnSaveActivity");
+  button.disabled = true;
+  try {
+    const result = await apiPost(payload);
+    closeManageActivity();
+    await handleSearch();
+    showStatus("searchStatus", "success", result.collisionRenamed ? "บันทึกแล้ว ระบบเติมเลขท้ายชื่อเพราะปลายทางมีชื่อซ้ำ" : "บันทึกการแก้ไขแล้ว");
+  } catch (error) {
+    showStatus("manageStatus", "error", error.message);
+  } finally {
+    button.disabled = false;
+  }
+}
+
+async function archiveManagedActivity() {
+  if (!state.manageTarget) return;
+  await archiveActivityItem(state.manageTarget, true);
+}
+
+async function archiveActivityItem(item, closeOverlayAfter) {
+  const confirmed = window.confirm("ลบกิจกรรมนี้ออกจากระบบค้นหา?\nกิจกรรมจะไม่แสดงในหน้าค้นหาหรือเว็บสาธารณะ แต่ไฟล์ยังเก็บอยู่ใน Google Drive และผู้ดูแลสามารถกู้คืนรายการได้");
+  if (!confirmed) return;
+  const button = document.getElementById("btnArchiveActivity");
+  if (closeOverlayAfter) button.disabled = true;
+  try {
+    await apiPost({
+      action: "archiveActivity",
+      idToken: await getFreshIdToken(),
+      uploadId: item.uploadId,
+      folderId: item.folderId
+    });
+    if (closeOverlayAfter) closeManageActivity();
+    clearAppendState();
+    await handleSearch();
+    showStatus("searchStatus", "success", "ลบกิจกรรมออกจากผลค้นหาแล้ว ไฟล์ใน Drive ไม่ถูกลบ");
+  } catch (error) {
+    showStatus(closeOverlayAfter ? "manageStatus" : "searchStatus", "error", error.message);
+  } finally {
+    if (closeOverlayAfter) button.disabled = false;
+  }
+}
+
+async function restoreActivity(item) {
+  if (!window.confirm(`กู้คืนกิจกรรม “${item.activityName}” ใช่หรือไม่`)) return;
+  try {
+    await apiPost({
+      action: "restoreActivity",
+      idToken: await getFreshIdToken(),
+      uploadId: item.uploadId,
+      folderId: item.folderId
+    });
+    await handleSearch();
+    showStatus("searchStatus", "success", "กู้คืนกิจกรรมแล้ว");
+  } catch (error) {
+    showStatus("searchStatus", "error", error.message);
+  }
+}
+
 async function loadSearchYears() {
   try {
     const result = await apiGet({
       action: "getYears",
       idToken: await getFreshIdToken()
     });
-    fillYearSelect(document.getElementById("searchYear"), true, result.years || []);
+    const select = document.getElementById("searchYear");
+    const selected = select.value;
+    fillYearSelect(select, true, result.years || []);
+    if ((result.years || []).map(String).includes(selected)) select.value = selected;
   } catch (_) {
   }
 }
@@ -1498,6 +1705,17 @@ function renderAllowedUsers(users) {
   });
 }
 
+function bindActivityManagement() {
+  fillCategorySelect(document.getElementById("manageCategory"), false);
+  fillMonthSelect(document.getElementById("manageMonth"), false);
+  fillYearSelect(document.getElementById("manageYear"), false, getEditableYears());
+  document.getElementById("manageYear").addEventListener("change", syncManageDays);
+  document.getElementById("manageMonth").addEventListener("change", syncManageDays);
+  document.getElementById("btnSaveActivity").addEventListener("click", saveManagedActivity);
+  document.getElementById("btnArchiveActivity").addEventListener("click", archiveManagedActivity);
+  document.getElementById("btnCancelManage").addEventListener("click", closeManageActivity);
+}
+
 function editAllowedUser(user) {
   document.getElementById("allowedUserEmail").value = user.email;
   document.getElementById("allowedUserName").value = user.displayName || "";
@@ -1564,20 +1782,22 @@ function collectNewActivityForm() {
   const month = Number(document.getElementById("month").value || 0);
   const day = Number(document.getElementById("day").value || 0);
   const activityName = document.getElementById("activityName").value.trim();
+  const visibility = document.getElementById("visibility").value;
   if (!category || !yearBE || !month || !day || !activityName || !state.newFiles.length) {
     showStatus("uploadStatus", "error", "กรอกข้อมูลและเลือกไฟล์ให้ครบก่อน");
     return null;
   }
-  return { category, yearBE, month, day, activityName };
+  return { category, yearBE, month, day, activityName, visibility };
 }
 
 function clearNewForm() {
   document.getElementById("category").value = "";
-  document.getElementById("yearBE").value = CONFIG.UPLOAD_YEARS[0] ? String(CONFIG.UPLOAD_YEARS[0]) : "";
+  document.getElementById("yearBE").value = String(CONFIG.CURRENT_YEAR_BE);
   document.getElementById("month").value = "";
   document.getElementById("day").innerHTML = '<option value="">เลือกวัน</option>';
   document.getElementById("activityPreset").value = "";
   document.getElementById("activityName").value = "";
+  document.getElementById("visibility").value = "public";
   state.newFiles = [];
   renderFiles("new");
   validateNewUpload();
