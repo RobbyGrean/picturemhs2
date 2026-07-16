@@ -101,6 +101,7 @@ PICMHS2 แยกสิทธิ์ผู้ใช้ออกเป็นสา
 - บังคับเลือกปี พ.ศ. ก่อนค้นหา ส่วนเดือน วัน หมวด และชื่อกิจกรรมเป็นตัวเลือก
 - แสดงเฉพาะ `activity_status = active` และ `visibility = public`
 - เปิดโฟลเดอร์รูปใน Google Drive
+- แสดงภาพประกอบหมวดแบบ SVG ในผลค้นหาและกิจกรรมล่าสุด โดยใช้ `loading="lazy"` และไม่เรียก Drive API เพิ่ม
 - ไม่มี upload, create folder, metadata write หรือ administration capability
 
 ## 1.3 🧩 สถาปัตยกรรม
@@ -475,7 +476,7 @@ GOOGLE_CLIENT_ID = OAuth Client ID จากขั้นตอนก่อนห
 
 ## 3.6 🖥️ ตั้งค่า frontend
 
-### `index.html`
+### `assets/js/app.js`
 
 ค้นหา `const CONFIG` แล้วแทนค่า:
 
@@ -506,6 +507,13 @@ repository/
 ├── README.md
 ├── index.html
 ├── guide.html
+├── assets/
+│   ├── css/app.css
+│   ├── js/app.js
+│   └── covers/
+│       ├── activity.svg
+│       ├── travel.svg
+│       └── meeting.svg
 ├── public/
 │   └── index.html
 └── starter/
@@ -589,7 +597,7 @@ Functional MVP ที่ยืนยันแล้ว:
 - protected GET/POST actions ยังปฏิเสธ request ที่ไม่มี token
 - frontend แยก uploader และ public search แล้ว
 
-การ deploy backend ต้องสร้าง Apps Script version ใหม่ ส่วนการแก้ `index.html`, `public/index.html` หรือ `guide.html` ใช้การ deploy GitHub Pages เท่านั้น
+การ deploy backend ต้องสร้าง Apps Script version ใหม่ ส่วนการแก้ `index.html`, `assets/`, `public/index.html` หรือ `guide.html` ใช้การ deploy GitHub Pages เท่านั้น
 
 ## 3.12 🧭 แนวทางต่อยอด
 
@@ -614,6 +622,7 @@ Functional MVP ที่ยืนยันแล้ว:
 - card radius ระดับกลาง, border บาง และ shadow เบาเฉพาะจุดที่ต้องการลำดับชั้น
 - focus ring 3px, status แยก info/success/warning/error ด้วยข้อความและสัญลักษณ์ ไม่ใช้สีเพียงอย่างเดียว
 - mobile-first ตั้งแต่ 320px, รองรับ zoom 200% และ `prefers-reduced-motion`
+- result card ใช้ภาพประกอบหมวด SVG อัตราส่วน 8:5 พร้อมกำหนด `width`/`height`, `decoding="async"` และ lazy-load เพื่อลด layout shift และภาระเครือข่าย
 
 Component หลักที่ใช้ร่วมกัน ได้แก่ header/navigation, button, form field, tabs, panel/card, status banner, file item, result card, user card, empty state และ progress dialog
 

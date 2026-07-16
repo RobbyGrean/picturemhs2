@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" role="img" aria-labelledby="title desc">
+  <title id="title">ศึกษาดูงาน / เดินทาง</title>
+  <desc id="desc">ภาพประกอบกระเป๋าเดินทางและหมุดแผนที่บนพื้นหลังสีน้ำเงิน</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#2563eb"/>
+      <stop offset="1" stop-color="#1e3a8a"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="200" rx="22" fill="url(#bg)"/>
+  <path d="M0 154c52-34 103-39 154-15 52 24 107 15 166-28v89H0Z" fill="#93c5fd" opacity=".22"/>
+  <circle cx="48" cy="32" r="72" fill="#bfdbfe" opacity=".16"/>
+  <path d="M107 75h106a17 17 0 0 1 17 17v64a17 17 0 0 1-17 17H107a17 17 0 0 1-17-17V92a17 17 0 0 1 17-17Z" fill="#fff" opacity=".95"/>
+  <path d="M137 75V60a11 11 0 0 1 11-11h24a11 11 0 0 1 11 11v15" fill="none" stroke="#dbeafe" stroke-width="10"/>
+  <path d="M123 92v64m74-64v64" stroke="#60a5fa" stroke-width="8" stroke-linecap="round"/>
+  <path d="M259 43c-18 0-32 14-32 32 0 25 32 51 32 51s32-26 32-51c0-18-14-32-32-32Z" fill="#fbbf24"/>
+  <circle cx="259" cy="75" r="11" fill="#fff"/>
+</svg>

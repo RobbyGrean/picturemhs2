@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" role="img" aria-labelledby="title desc">
+  <title id="title">กิจกรรมและอื่นๆ</title>
+  <desc id="desc">ภาพประกอบกล้องและประกายดาวบนพื้นหลังสีเขียว</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#0b735f"/>
+      <stop offset="1" stop-color="#064e3b"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#a7f3d0" stop-opacity=".7"/>
+      <stop offset="1" stop-color="#5eead4" stop-opacity=".08"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="200" rx="22" fill="url(#bg)"/>
+  <circle cx="278" cy="22" r="105" fill="url(#glow)"/>
+  <circle cx="30" cy="190" r="88" fill="#34d399" opacity=".13"/>
+  <path d="M92 78h30l10-16h55l11 16h30a18 18 0 0 1 18 18v58a18 18 0 0 1-18 18H92a18 18 0 0 1-18-18V96a18 18 0 0 1 18-18Z" fill="#fff" opacity=".94"/>
+  <circle cx="160" cy="124" r="35" fill="#0b735f"/>
+  <circle cx="160" cy="124" r="22" fill="#99f6e4"/>
+  <path d="m235 43 5 13 13 5-13 5-5 13-5-13-13-5 13-5 5-13Z" fill="#fef3c7"/>
+  <circle cx="103" cy="101" r="6" fill="#34d399"/>
+</svg>

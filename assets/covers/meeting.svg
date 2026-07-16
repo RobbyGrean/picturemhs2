@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" role="img" aria-labelledby="title desc">
+  <title id="title">ประชุม / อบรม / สัมมนา</title>
+  <desc id="desc">ภาพประกอบกลุ่มคนประชุมบนพื้นหลังสีส้มทอง</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#d97706"/>
+      <stop offset="1" stop-color="#92400e"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="200" rx="22" fill="url(#bg)"/>
+  <circle cx="268" cy="30" r="94" fill="#fde68a" opacity=".17"/>
+  <path d="M36 200c13-49 50-77 99-77h50c49 0 86 28 99 77Z" fill="#fef3c7" opacity=".24"/>
+  <circle cx="160" cy="70" r="31" fill="#fff" opacity=".96"/>
+  <circle cx="93" cy="92" r="24" fill="#fffbeb" opacity=".92"/>
+  <circle cx="227" cy="92" r="24" fill="#fffbeb" opacity=".92"/>
+  <path d="M109 159c3-35 22-55 51-55s48 20 51 55" fill="#fff" opacity=".96"/>
+  <path d="M52 159c3-27 17-43 41-43 17 0 30 8 37 23m138 20c-3-27-17-43-41-43-17 0-30 8-37 23" fill="none" stroke="#fffbeb" stroke-width="20" stroke-linecap="round" opacity=".92"/>
+  <rect x="98" y="154" width="124" height="18" rx="9" fill="#fbbf24"/>
+</svg>

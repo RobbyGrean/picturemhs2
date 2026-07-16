@@ -143,7 +143,10 @@
     .status[hidden] { display: none; }
 
     .results { display: grid; gap: 10px; }
-    .result-card { border-radius: 15px; padding: 14px; }
+    .result-card { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 13px; border-radius: 15px; padding: 14px; }
+    .result-cover { position: relative; align-self: stretch; min-height: 96px; overflow: hidden; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-soft); }
+    .result-cover img { display: block; width: 100%; height: 100%; min-height: 96px; object-fit: cover; }
+    .result-card-body { display: grid; min-width: 0; gap: 12px; }
     .result-card h2 { margin: 0; font-size: 1.12rem; }
     .meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 12px; }
     .pill { padding: 4px 9px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface-soft); color: var(--muted); font-size: 0.76rem; }
@@ -156,7 +159,7 @@
       .panel { padding: 24px; }
       .filters { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       .field-wide { grid-column: span 2; }
-      .result-card { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 18px; }
+      .result-card-body { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 18px; }
       .result-card .button { white-space: nowrap; }
     }
 
@@ -164,6 +167,8 @@
       .utility-nav a:first-child { display: none; }
       .hero { padding-top: 34px; }
       .actions .button { flex: 1 1 120px; }
+      .result-card { grid-template-columns: 78px minmax(0, 1fr); gap: 10px; padding: 11px; }
+      .result-cover, .result-cover img { min-height: 78px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -248,6 +253,12 @@
       CATEGORIES: ["กิจกรรมและอื่นๆ", "ไปราชการ", "ประชุม"],
       MONTHS: ["", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"]
     };
+
+    const CATEGORY_COVER_FILES = new Map([
+      [CONFIG.CATEGORIES[0], "activity.svg"],
+      [CONFIG.CATEGORIES[1], "travel.svg"],
+      [CONFIG.CATEGORIES[2], "meeting.svg"]
+    ]);
 
     const form = document.getElementById("searchForm");
     const statusBox = document.getElementById("status");
@@ -365,6 +376,9 @@
       results.forEach((item) => {
         const card = document.createElement("article");
         card.className = "result-card";
+        const cover = createCategoryCover(item.category, "../assets/covers/");
+        const body = document.createElement("div");
+        body.className = "result-card-body";
 
         const content = document.createElement("div");
         const title = document.createElement("h2");
@@ -380,7 +394,7 @@
           meta.appendChild(pill);
         });
         content.appendChild(meta);
-        card.appendChild(content);
+        body.appendChild(content);
 
         if (isSafeDriveUrl(item.folderUrl)) {
           const link = document.createElement("a");
@@ -389,16 +403,31 @@
           link.target = "_blank";
           link.rel = "noopener noreferrer";
           link.textContent = "เปิดโฟลเดอร์รูป";
-          card.appendChild(link);
+          body.appendChild(link);
         } else {
           const message = document.createElement("p");
           message.className = "unavailable";
           message.textContent = "โฟลเดอร์นี้ยังไม่พร้อมให้เปิดแบบสาธารณะ";
-          card.appendChild(message);
+          body.appendChild(message);
         }
 
+        card.append(cover, body);
         container.appendChild(card);
       });
+    }
+
+    function createCategoryCover(category, basePath) {
+      const cover = document.createElement("div");
+      cover.className = "result-cover";
+      const image = document.createElement("img");
+      image.src = `${basePath}${CATEGORY_COVER_FILES.get(category) || "activity.svg"}`;
+      image.alt = `ภาพประกอบหมวด ${category || "กิจกรรม"}`;
+      image.width = 320;
+      image.height = 200;
+      image.loading = "lazy";
+      image.decoding = "async";
+      cover.appendChild(image);
+      return cover;
     }
 
     function formatThaiDate(item) {
