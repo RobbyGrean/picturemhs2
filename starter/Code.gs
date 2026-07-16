@@ -719,7 +719,11 @@ function backfillActivityCovers(limit) {
   const sheet = getUploadsSheet();
   ensureUploadsHeader(sheet);
   const rows = sheet.getDataRange().getValues();
-  if (rows.length <= 1) return { updated: 0, withoutCover: 0, checked: 0, pending: 0, errors: [] };
+  if (rows.length <= 1) {
+    const emptyResult = { updated: 0, withoutCover: 0, checked: 0, pending: 0, errors: [] };
+    console.log("backfillActivityCovers " + JSON.stringify(emptyResult));
+    return emptyResult;
+  }
   const header = mapHeader(rows[0]);
   const coverColumn = header.cover_file_id;
   const values = rows.slice(1).map(function(row) { return [String(row[coverColumn] || "").trim()]; });
@@ -750,7 +754,9 @@ function backfillActivityCovers(limit) {
   }
   if (changed) sheet.getRange(2, coverColumn + 1, values.length, 1).setValues(values);
   const pending = values.filter(function(row) { return !row[0]; }).length;
-  return { updated: updated, withoutCover: withoutCover, checked: checked, pending: pending, errors: errors };
+  const result = { updated: updated, withoutCover: withoutCover, checked: checked, pending: pending, errors: errors };
+  console.log("backfillActivityCovers " + JSON.stringify(result));
+  return result;
 }
 
 function validateCoverFile(fileId, folderId) {

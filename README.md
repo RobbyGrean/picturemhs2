@@ -473,7 +473,7 @@ GOOGLE_CLIENT_ID = OAuth Client ID จากขั้นตอนก่อนห
 8. บันทึก project
 9. เลือกฟังก์ชัน `setupActivityManagement()` แล้วกด Run หนึ่งครั้ง เพื่อเพิ่ม/backfill `visibility`, เพิ่ม `cover_file_id` และสร้าง `activity_audit`
 10. ตรวจว่า `uploads!R1` เป็น `visibility`, `uploads!S1` เป็น `cover_file_id`, แถวเดิมมี visibility เป็น `public` และมี tab `activity_audit`
-11. สำหรับกิจกรรมเก่า ให้เลือก `backfillActivityCovers` แล้วกด Run; ฟังก์ชันตรวจสูงสุด 100 กิจกรรมต่อครั้ง ให้รันซ้ำจน `pending` เป็น 0 และตรวจรายการ `errors` หากมี
+11. สำหรับกิจกรรมเก่า ให้เลือก `backfillActivityCovers` แล้วกด Run; ดูผล `updated`, `pending` และ `errors` ใน **บันทึกการดำเนินการ** ให้รันซ้ำจน `pending` เป็น 0 และตรวจรายการ `errors` หากมี
 12. กด **Deploy → New deployment → Web app**
 13. ตั้ง **Execute as: Me** หรือเจ้าของระบบ
 14. ตั้ง access ให้ endpoint ถูกเรียกจาก GitHub Pages ได้ โดย public search ต้องเข้าถึงได้แบบ Anyone
