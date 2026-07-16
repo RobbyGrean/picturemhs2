@@ -150,6 +150,7 @@
     .unavailable { margin: 0; color: var(--danger); font-size: 0.88rem; }
     .privacy-note { margin-top: 18px; padding: 14px 16px; border-left: 4px solid var(--accent); border-radius: 11px; background: var(--accent-soft); color: var(--muted); font-size: 0.8rem; }
     .privacy-note strong { color: var(--accent-strong); }
+    .latest-panel { margin-bottom: 16px; }
 
     @media (min-width: 680px) {
       .panel { padding: 24px; }
@@ -189,16 +190,25 @@
       <p>เลือกวันที่ หมวด หรือพิมพ์ชื่อกิจกรรม แล้วเปิดโฟลเดอร์รูปที่องค์กรอนุญาตให้เผยแพร่ผ่าน Google Drive</p>
     </header>
 
+    <section class="panel latest-panel" aria-labelledby="latestHeading">
+      <div class="panel-head">
+        <h2 id="latestHeading">กิจกรรมล่าสุด</h2>
+        <p>สูงสุด 10 กิจกรรมที่เผยแพร่ เรียงตามวันที่กิจกรรมล่าสุด</p>
+      </div>
+      <div class="status" id="latestStatus" role="status" aria-live="polite">กำลังโหลดกิจกรรมล่าสุด...</div>
+      <div class="results" id="latestResults" aria-label="กิจกรรมล่าสุด" aria-busy="true"></div>
+    </section>
+
     <section class="panel" aria-labelledby="searchHeading">
       <div class="panel-head">
         <h2 id="searchHeading">ค้นหากิจกรรม</h2>
-        <p>เลือกเฉพาะข้อมูลที่ทราบ หรือไม่เลือกตัวกรองเพื่อดูกิจกรรมล่าสุด 10 รายการ</p>
+        <p>เลือกปี พ.ศ. ก่อนค้นหา ส่วนเดือน วัน หมวด และชื่อกิจกรรมไม่บังคับ</p>
       </div>
       <form id="searchForm">
         <div class="filters">
           <div class="field">
-            <label for="yearBE">ปี พ.ศ.</label>
-            <select id="yearBE" name="yearBE"><option value="">ทุกปี</option></select>
+            <label for="yearBE">ปี พ.ศ. *</label>
+            <select id="yearBE" name="yearBE" required><option value="">เลือกปี</option></select>
           </div>
           <div class="field">
             <label for="month">เดือน</label>
@@ -224,7 +234,7 @@
       </form>
     </section>
 
-    <div class="status" id="status" role="status" aria-live="polite">เริ่มค้นหาได้ทันที ระบบจะแสดงเฉพาะกิจกรรมที่อนุญาตให้เผยแพร่</div>
+    <div class="status" id="status" role="status" aria-live="polite">เลือกปีแล้วค้นหา ระบบจะแสดงเฉพาะกิจกรรมที่อนุญาตให้เผยแพร่</div>
     <section class="results" id="results" aria-label="ผลการค้นหา" aria-busy="false"></section>
     <p class="privacy-note"><strong>ความเป็นส่วนตัว:</strong> หน้านี้แสดงเฉพาะข้อมูลและโฟลเดอร์กิจกรรมที่องค์กรอนุญาตให้เผยแพร่ ลิงก์สามารถส่งต่อได้ และการเปิดหรือดาวน์โหลดไฟล์ดำเนินการผ่าน Google Drive</p>
   </main>
@@ -233,7 +243,8 @@
     const CONFIG = {
       API_URL: "https://script.google.com/macros/s/AKfycbzDyucuarduxEiLv-s4mpgoeJ6cKrx77nMPlc30-tb82z3DDsLPgVcqO1zSSwV5WXBZig/exec",
       REQUEST_TIMEOUT_MS: 15000,
-      YEARS: [2567, 2568, 2569, 2570, 2571],
+      PUBLIC_YEAR_MIN: 2567,
+      CURRENT_YEAR_BE: Number(new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Bangkok", year: "numeric" }).format(new Date())) + 543,
       CATEGORIES: ["กิจกรรมและอื่นๆ", "ไปราชการ", "ประชุม"],
       MONTHS: ["", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"]
     };
@@ -241,6 +252,8 @@
     const form = document.getElementById("searchForm");
     const statusBox = document.getElementById("status");
     const resultsBox = document.getElementById("results");
+    const latestStatusBox = document.getElementById("latestStatus");
+    const latestResultsBox = document.getElementById("latestResults");
     const searchButton = document.getElementById("searchButton");
 
     seedOptions();
@@ -248,9 +261,12 @@
     document.getElementById("clearButton").addEventListener("click", clearFilters);
     document.getElementById("yearBE").addEventListener("change", syncDays);
     document.getElementById("month").addEventListener("change", syncDays);
+    loadLatest();
 
     function seedOptions() {
-      appendOptions(document.getElementById("yearBE"), CONFIG.YEARS.map((year) => [year, year]));
+      const years = Array.from({ length: CONFIG.CURRENT_YEAR_BE - CONFIG.PUBLIC_YEAR_MIN + 1 }, (_, index) => CONFIG.CURRENT_YEAR_BE - index);
+      appendOptions(document.getElementById("yearBE"), years.map((year) => [year, year]));
+      document.getElementById("yearBE").value = String(CONFIG.CURRENT_YEAR_BE);
       appendOptions(document.getElementById("month"), CONFIG.MONTHS.slice(1).map((name, index) => [index + 1, name]));
       appendOptions(document.getElementById("category"), CONFIG.CATEGORIES.map((name) => [name, name]));
       syncDays();
@@ -268,7 +284,7 @@
     function syncDays() {
       const select = document.getElementById("day");
       const selected = select.value;
-      const yearBE = Number(document.getElementById("yearBE").value || 2569);
+      const yearBE = Number(document.getElementById("yearBE").value || CONFIG.CURRENT_YEAR_BE);
       const month = Number(document.getElementById("month").value || 0);
       const total = month ? new Date(yearBE - 543, month, 0).getDate() : 31;
       select.replaceChildren(new Option("ทุกวัน", ""));
@@ -278,6 +294,11 @@
 
     async function handleSearch(event) {
       event.preventDefault();
+      if (!document.getElementById("yearBE").value) {
+        showStatus("เลือกปี พ.ศ. ก่อนค้นหา", "error");
+        document.getElementById("yearBE").focus();
+        return;
+      }
       setLoading(true);
       showStatus("กำลังค้นหากิจกรรม...", "info");
       resultsBox.replaceChildren();
@@ -291,7 +312,7 @@
 
         const data = await fetchJson(`${CONFIG.API_URL}?${params}`, CONFIG.REQUEST_TIMEOUT_MS);
         if (!data.ok) throw new Error(toThaiApiError(data.error));
-        renderResults(Array.isArray(data.results) ? data.results : []);
+        renderResults(Array.isArray(data.results) ? data.results : [], resultsBox);
 
         if (!data.results || !data.results.length) {
           showStatus("ไม่พบกิจกรรมที่ตรงกับเงื่อนไข ลองลดตัวกรองหรือใช้คำค้นที่สั้นลง", "info");
@@ -303,6 +324,23 @@
         showStatus(error.name === "AbortError" ? "ระบบใช้เวลาตอบนานเกินไป กรุณาลองใหม่" : error.message, "error");
       } finally {
         setLoading(false);
+      }
+    }
+
+    async function loadLatest() {
+      latestResultsBox.setAttribute("aria-busy", "true");
+      try {
+        const data = await fetchJson(`${CONFIG.API_URL}?action=publicLatest`, CONFIG.REQUEST_TIMEOUT_MS);
+        if (!data.ok) throw new Error(toThaiApiError(data.error));
+        const results = Array.isArray(data.results) ? data.results : [];
+        renderResults(results, latestResultsBox);
+        latestStatusBox.dataset.type = results.length ? "success" : "info";
+        latestStatusBox.textContent = results.length ? `แสดง ${results.length} กิจกรรมล่าสุด` : "ยังไม่มีกิจกรรมที่เผยแพร่";
+      } catch (error) {
+        latestStatusBox.dataset.type = "error";
+        latestStatusBox.textContent = error.name === "AbortError" ? "โหลดกิจกรรมล่าสุดใช้เวลานานเกินไป" : error.message;
+      } finally {
+        latestResultsBox.setAttribute("aria-busy", "false");
       }
     }
 
@@ -322,8 +360,8 @@
       }
     }
 
-    function renderResults(results) {
-      resultsBox.replaceChildren();
+    function renderResults(results, container) {
+      container.replaceChildren();
       results.forEach((item) => {
         const card = document.createElement("article");
         card.className = "result-card";
@@ -359,7 +397,7 @@
           card.appendChild(message);
         }
 
-        resultsBox.appendChild(card);
+        container.appendChild(card);
       });
     }
 
@@ -384,9 +422,10 @@
 
     function clearFilters() {
       form.reset();
+      document.getElementById("yearBE").value = String(CONFIG.CURRENT_YEAR_BE);
       syncDays();
       resultsBox.replaceChildren();
-      showStatus("ล้างตัวกรองแล้ว กดค้นหาเพื่อดู 10 กิจกรรมล่าสุด", "info");
+      showStatus("ล้างตัวกรองแล้ว เลือกปีปัจจุบันไว้ให้พร้อมค้นหา", "info");
       document.getElementById("yearBE").focus();
     }
 
