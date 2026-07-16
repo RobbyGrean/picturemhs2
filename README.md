@@ -2,10 +2,12 @@
 
 PICMHS2 เป็นตัวอย่าง Web App แบบไม่ต้องดูแลเซิร์ฟเวอร์เอง ใช้ GitHub Pages เป็นหน้าเว็บ, Google Apps Script เป็น API และ policy layer, Google Drive เก็บไฟล์ และ Google Sheets เก็บ metadata สำหรับค้นหา
 
-- เว็บไซต์ uploader: `https://<github-user>.github.io/<repository>/`
-- เว็บไซต์ค้นหาสาธารณะ: `https://<github-user>.github.io/<repository>/public/`
-- คู่มือบนเว็บไซต์: `https://<github-user>.github.io/<repository>/guide.html`
-- Backend template สำหรับนำไปสร้างระบบของตนเอง: [`starter/Code.gs`](starter/Code.gs)
+เอกสารนี้อัปเดตตาม Activity Management รุ่นที่ใช้งานในเดือนกรกฎาคม 2569
+
+- เว็บไซต์ uploader: `https://robbygrean.github.io/picturemhs2/`
+- เว็บไซต์ค้นหาสาธารณะ: `https://robbygrean.github.io/picturemhs2/public/`
+- คู่มือบนเว็บไซต์: `https://robbygrean.github.io/picturemhs2/guide.html`
+- Backend ปัจจุบัน: [`Code.gs`](Code.gs)
 - Prompt สำหรับทำ UI/UX รอบถัดไป: [`UI_UX_REDESIGN_PROMPT.md`](UI_UX_REDESIGN_PROMPT.md)
 
 > ข้อควรระวัง: Repository นี้เป็นตัวอย่างสถาปัตยกรรม ระบบจริงต้องเปลี่ยน Google Client ID, Apps Script URL, Drive folder ID, Spreadsheet ID และรายชื่อผู้ดูแลเป็นของตนเองก่อนใช้งาน
@@ -24,10 +26,11 @@ PICMHS2 เป็นตัวอย่าง Web App แบบไม่ต้อ
 - ผู้ที่มีหน้าที่อัปโหลดกับผู้ที่ต้องการเพียงค้นหารูปได้รับสิทธิ์มากเกินความจำเป็น
 - การสร้างระบบใหม่มักต้องมี server, database และผู้ดูแลระบบ
 
-PICMHS2 แยกผู้ใช้ออกเป็นสองกลุ่ม:
+PICMHS2 แยกสิทธิ์ผู้ใช้ออกเป็นสามกลุ่ม:
 
-1. **Uploader** — ต้อง Google Sign-In, อยู่ใน allowlist และมีสิทธิ์ Editor บน Drive root จึงสร้างกิจกรรมและอัปโหลดได้
-2. **Public visitor** — ไม่ต้องล็อกอิน ใช้ได้เฉพาะการค้นหา metadata ที่อนุญาตและเปิดโฟลเดอร์ Drive แบบ Viewer
+1. **Activity owner / Uploader** — ต้อง Google Sign-In, อยู่ใน allowlist และมีสิทธิ์ Editor บน Drive root ผู้สร้างกิจกรรมเป็นเจ้าของกิจกรรมนั้น
+2. **Admin** — จัดการ uploader และจัดการกิจกรรมของทุกคนภายในช่วงปีที่แก้ไขได้ รวมถึงกู้คืนรายการที่ลบ
+3. **Public visitor** — ไม่ต้องล็อกอิน ค้นหาได้เฉพาะกิจกรรม `active` ที่ตั้งเป็น `public`
 
 ## 1.2 ความสามารถหลัก
 
@@ -39,14 +42,19 @@ PICMHS2 แยกผู้ใช้ออกเป็นสองกลุ่ม
 - บันทึก metadata หนึ่งแถวต่อหนึ่งกิจกรรมลง Google Sheets
 - ค้นหากิจกรรมเดิม
 - อัปโหลดไฟล์เพิ่มเข้าโฟลเดอร์กิจกรรมเดิม
+- เจ้าของกิจกรรมหรือ Admin แก้หมวด วันที่ ชื่อ และการเผยแพร่ได้
+- ย้ายหรือเปลี่ยนชื่อโฟลเดอร์เดิมโดยรักษา folder ID, URL และไฟล์
+- ลบกิจกรรมออกจากระบบค้นหาแบบ soft delete โดยไม่ลบไฟล์ใน Drive
+- Admin ดูรายการที่ลบแล้วและกู้คืนได้
 - Admin เพิ่ม แก้ไข เปิด หรือปิดสิทธิ์ uploader จากหน้าเว็บไซต์
 
 ### ฝั่ง public
 
 - ไม่โหลด Google Identity Services
 - ไม่ขอ Drive OAuth token
-- ค้นหาด้วยปี พ.ศ., เดือน, วัน, หมวด และชื่อกิจกรรม
-- แสดงเฉพาะกิจกรรมที่มี `activity_status = active`
+- แสดงกิจกรรมล่าสุดที่เผยแพร่สูงสุด 10 รายการ
+- บังคับเลือกปี พ.ศ. ก่อนค้นหา ส่วนเดือน วัน หมวด และชื่อกิจกรรมเป็นตัวเลือก
+- แสดงเฉพาะ `activity_status = active` และ `visibility = public`
 - เปิดโฟลเดอร์รูปใน Google Drive
 - ไม่มี upload, create folder, metadata write หรือ administration capability
 
@@ -67,7 +75,7 @@ GitHub Pages uploader UI -------------------> Apps Script API
 Public visitor
         |
         v
-GitHub Pages public UI ---------------------> Apps Script publicSearch
+GitHub Pages public UI ---------------------> Apps Script publicSearch/publicLatest
                                                ` อ่าน sanitized metadata เท่านั้น
 ```
 
@@ -75,8 +83,8 @@ GitHub Pages public UI ---------------------> Apps Script publicSearch
 
 | ส่วน | เทคโนโลยี | หน้าที่ |
 |---|---|---|
-| Uploader frontend | `index.html` บน GitHub Pages | Login, upload, authenticated search, append upload |
-| Public frontend | `public/index.html` | ค้นหาแบบไม่ล็อกอินและเปิด Drive |
+| Uploader frontend | `index.html` บน GitHub Pages | Login, upload, search, append, edit/move, visibility, soft delete/restore |
+| Public frontend | `public/index.html` | กิจกรรมล่าสุด ค้นหาแบบไม่ล็อกอิน และเปิด Drive |
 | User guide | `guide.html` | คู่มือการใช้งานบนเว็บไซต์ |
 | Backend | Google Apps Script | Authentication boundary, folder creation, metadata API |
 | File storage | Google Drive | เก็บรูปและวิดีโอจริง |
@@ -117,19 +125,29 @@ Uploader ปกติต้องผ่านสามชั้น:
 
 ### Public visitor
 
-- เรียกได้เฉพาะ GET `action=publicSearch`
+- เรียกได้เฉพาะ GET `action=publicSearch` และ `action=publicLatest`
 - ผลลัพธ์ไม่ส่งอีเมลหรือชื่อ uploader
 - ไม่ส่ง `folderId`, internal folder path หรือข้อมูล write capability
 - ทุก POST action และ authenticated search ยังต้องมี ID token
 - Drive root สำหรับข้อมูลสาธารณะต้องเป็น `Anyone with the link — Viewer`
 
-ลิงก์ Drive ไม่ใช่รหัสลับ ผู้ที่ได้รับลิงก์สามารถส่งต่อได้ จึงต้องใช้ public root เฉพาะกับข้อมูลที่องค์กรอนุญาตให้เผยแพร่เท่านั้น
+### เจ้าของกิจกรรมและช่วงปีที่แก้ไขได้
+
+- `uploaded_by` จาก verified ID token ตอนสร้างแถวครั้งแรกคือเจ้าของกิจกรรม
+- `last_uploaded_by` ไม่ทำให้ผู้ที่อัปโหลดเพิ่มกลายเป็นเจ้าของ
+- เจ้าของและ Admin แก้ไข ย้าย เปลี่ยน visibility หรือลบกิจกรรมได้เฉพาะปีปัจจุบันและย้อนหลังสองปีตามเวลา Bangkok
+- uploader คนอื่นอัปโหลดเพิ่มได้เฉพาะกิจกรรม active ในช่วงปีเดียวกัน แต่แก้ไขหรือลบไม่ได้
+- กิจกรรมเก่ากว่านั้นยังค้นหาและเปิด Drive ได้ แต่เป็น read-only
+
+`visibility = internal` หมายถึงไม่แสดงบนเว็บสาธารณะ ไม่ใช่การทำ Drive ให้เป็น private ผู้ที่มีลิงก์ Drive เดิมอาจยังเปิดได้ตามสิทธิ์ที่ตั้งไว้ หากต้องการข้อมูลลับจริงต้องใช้ permission/root แยก
 
 ## 1.6 ข้อจำกัดที่ยอมรับใน MVP
 
 - ไม่มี gallery รายไฟล์ เพราะ metadata เก็บระดับกิจกรรม
 - ไม่มี bulk ZIP download
-- ไม่มี metadata edit/admin UI
+- ไม่มี permanent delete จาก Drive
+- ไม่มีการโอนเจ้าของกิจกรรม
+- ไม่มีการแก้ไขหรืออัปโหลดเพิ่มให้กิจกรรมเก่ากว่าช่วงสามปี
 - ไม่มี automatic Drive sync
 - Apps Script อาจมี cold start; การค้นหาปกติมักใช้เวลาหลายวินาทีแม้ข้อมูลน้อย
 - การค้นหาปัจจุบันอ่านแถว metadata แล้วกรองใน Apps Script จึงควรพิจารณา cache เมื่อจำนวนกิจกรรมเพิ่มขึ้น
@@ -143,15 +161,17 @@ Uploader ปกติต้องผ่านสามชั้น:
 ## 2.1 สำหรับผู้ค้นหารูปทั่วไป
 
 1. เปิด URL `/public/`
-2. เลือกตัวกรองที่ทราบ เช่น ปี เดือน วัน หรือหมวด
-3. พิมพ์ชื่อกิจกรรมเต็มหรือคำบางส่วนได้
-4. กด **ค้นหา**
-5. อ่านชื่อกิจกรรม วันที่ หมวด และจำนวนไฟล์โดยประมาณ
-6. กด **เปิดโฟลเดอร์รูป**
-7. ใช้เครื่องมือของ Google Drive เพื่อเปิดหรือดาวน์โหลดไฟล์
-8. กด **ล้างตัวกรอง** เมื่อต้องการเริ่มใหม่
+2. ดูกิจกรรมล่าสุดที่เผยแพร่ได้ทันที สูงสุด 10 รายการ
+3. เมื่อต้องการค้นหา ให้เลือกปี พ.ศ. ก่อนทุกครั้ง
+4. เลือกเดือน วัน หรือหมวดเพิ่มเติมได้ตามข้อมูลที่ทราบ
+5. พิมพ์ชื่อกิจกรรมเต็มหรือคำบางส่วนได้
+6. กด **ค้นหา**
+7. อ่านชื่อกิจกรรม วันที่ หมวด และจำนวนไฟล์โดยประมาณ
+8. กด **เปิดโฟลเดอร์รูป**
+9. ใช้เครื่องมือของ Google Drive เพื่อเปิดหรือดาวน์โหลดไฟล์
+10. กด **ล้างตัวกรอง** เมื่อต้องการเริ่มใหม่
 
-หากไม่ใส่ตัวกรอง ระบบจะแสดงกิจกรรมล่าสุดจำนวนจำกัด ไม่ dump ข้อมูลทั้งหมด
+การค้นหาสาธารณะไม่อนุญาตให้เว้นปีว่าง กิจกรรมล่าสุดเป็น dashboard แยกจากผลค้นหา
 
 ## 2.2 สำหรับ uploader — เข้าสู่ระบบ
 
@@ -164,13 +184,16 @@ Uploader ปกติต้องผ่านสามชั้น:
 ## 2.3 สำหรับ uploader — สร้างกิจกรรมใหม่
 
 1. เลือกหมวด
-2. เลือกปี พ.ศ., เดือน และวัน
+2. เลือกปี พ.ศ. ภายในปีปัจจุบันและย้อนหลังสองปี แล้วเลือกเดือนและวัน
 3. เลือกชื่อสำเร็จรูปหรือพิมพ์ชื่อกิจกรรมเอง
-4. เลือกรูปหรือวิดีโอ
-5. ตรวจรายการไฟล์
-6. กด **อัปโหลดกิจกรรมใหม่**
-7. รอจนระบบสร้างโฟลเดอร์ อัปโหลดไฟล์ และบันทึก metadata ครบ
-8. ห้ามปิดหน้า browser ระหว่างอัปโหลด
+4. เลือกการเผยแพร่: `public` หรือ `internal` ค่าเริ่มต้นคือ `public`
+5. เลือกรูปหรือวิดีโอ
+6. ตรวจรายการไฟล์
+7. กด **อัปโหลดกิจกรรมใหม่**
+8. รอจนระบบสร้างโฟลเดอร์ อัปโหลดไฟล์ และบันทึก metadata ครบ
+9. ห้ามปิดหน้า browser ระหว่างอัปโหลด
+
+ถ้ามีกิจกรรม active ที่มีหมวด วันที่ และชื่อเดียวกัน ระบบจะไม่สร้างแถวซ้ำ ให้ค้นหาแล้วใช้ **อัปโหลดเพิ่ม**
 
 เมื่อสำเร็จ ระบบจะสร้างโครงสร้างประมาณนี้:
 
@@ -186,7 +209,7 @@ PICMHS2/
 ## 2.4 สำหรับ uploader — ค้นหาและอัปโหลดเพิ่ม
 
 1. เปิดแท็บค้นหา
-2. กรอกตัวกรองหรือชื่อกิจกรรม
+2. เลือกปี พ.ศ. ก่อนค้นหา ตัวกรองอื่นเป็นตัวเลือก
 3. กด **ค้นหา**
 4. เลือกกิจกรรมเป้าหมายจากผลลัพธ์
 5. เลือกไฟล์ที่ต้องการเพิ่ม
@@ -195,7 +218,26 @@ PICMHS2/
 
 วิธีนี้ทำให้ `file_count`, `updated_at` และ `last_uploaded_by` อัปเดตตามระบบ
 
-## 2.5 สำหรับ Admin — จัดการ uploader
+กิจกรรมเก่ากว่าปีปัจจุบันย้อนหลังสองปีจะแสดงป้ายอ่านอย่างเดียว เปิด Drive ได้ แต่ไม่มีปุ่มอัปโหลดเพิ่ม แก้ไข หรือลบ
+
+## 2.5 สำหรับเจ้าของกิจกรรมหรือ Admin — แก้ไขและย้าย
+
+1. เปิดแท็บ **ค้นหา / อัปโหลดเพิ่ม** และเลือกปี
+2. ค้นหากิจกรรมแล้วกด **แก้ไข/ย้ายกิจกรรม**
+3. แก้หมวด ปี เดือน วัน ชื่อกิจกรรม หรือการเผยแพร่
+4. กด **บันทึกการแก้ไข**
+5. หากปลายทางมีชื่อซ้ำ ระบบเติม `(1)`, `(2)` ต่อท้าย โดยไม่รวมโฟลเดอร์เข้าด้วยกัน
+
+การย้ายหรือเปลี่ยนชื่อผ่านระบบรักษา folder ID, URL, เจ้าของเดิม และไฟล์ทั้งหมดไว้ หากต้องการปิดหน้าต่าง ใช้ปุ่ม **ยกเลิก**, ปุ่ม **×** หรือกด `Escape`
+
+## 2.6 การเผยแพร่และการลบกิจกรรม
+
+- **เผยแพร่และบุคคลทั่วไปค้นหาได้ (`public`)** — แสดงใน Public Search และกิจกรรมล่าสุด
+- **ไม่เผยแพร่ (`internal`)** — แสดงเฉพาะผู้ใช้ที่ล็อกอิน แต่ผู้มีลิงก์ Drive เดิมอาจยังเปิดได้
+- **ลบกิจกรรมนี้** — เปลี่ยน `activity_status` เป็น `archived` และซ่อนจากผลค้นหาทั้งหมด ไฟล์ใน Drive ไม่ถูกลบ
+- เฉพาะ Admin เปิดตัวกรองรายการที่ลบแล้วและกู้คืนได้
+
+## 2.7 สำหรับ Admin — จัดการ uploader
 
 1. Login ด้วยอีเมลที่อยู่ใน `CONFIG.ADMIN_EMAILS`
 2. เปิดแท็บ **จัดการ uploader**
@@ -207,22 +249,24 @@ PICMHS2/
 
 Uploader ทั่วไปจะไม่เห็นแท็บนี้ และ backend จะปฏิเสธ request แม้พยายามเรียก API โดยตรง
 
-## 2.6 สิ่งที่ไม่ควรทำ
+## 2.8 สิ่งที่ไม่ควรทำ
 
 - ไม่ควรสร้างกิจกรรมใหม่ด้วยการสร้างโฟลเดอร์ใน Drive เอง
-- ไม่ควรเปลี่ยนชื่อหรือย้ายโฟลเดอร์ที่ระบบสร้าง หากไม่แก้ metadata ให้ตรงกัน
-- ไม่ควรลบโฟลเดอร์โดยไม่เปลี่ยน `activity_status` หรือจัดการ metadata
+- ไม่ควรเปลี่ยนชื่อหรือย้ายโฟลเดอร์ที่ระบบสร้างใน Drive ให้ใช้ปุ่ม **แก้ไข/ย้ายกิจกรรม**
+- ไม่ควรลบโฟลเดอร์ใน Drive ให้ใช้ **ลบกิจกรรมนี้** ซึ่งเป็น soft delete
 - ไม่ควรแชร์ Editor ให้บุคคลที่มีหน้าที่ค้นหาหรือดาวน์โหลดเพียงอย่างเดียว
-- ไม่ควรนำ private/confidential activity ไว้ใต้ public root
+- ไม่ควรคิดว่า `internal` ทำให้ Drive private หากเป็นข้อมูลลับต้องตรวจ permission หรือใช้ root แยก
 
-## 2.7 การแก้ปัญหาเบื้องต้น
+## 2.9 การแก้ปัญหาเบื้องต้น
 
 | อาการ | ตรวจสอบ |
 |---|---|
 | Login ไม่ได้ | OAuth origin, test user, `GOOGLE_CLIENT_ID`, allowlist |
 | สร้างโฟลเดอร์ไม่ได้ | Apps Script deployment, owner access, root folder ID |
 | อัปโหลดไฟล์ไม่ได้ | Drive API, `drive.file` scope, uploader เป็น Editor |
-| ค้นหา public ไม่พบ | มีแถวใน `uploads`, status เป็น `active`, ตัวกรองถูกต้อง |
+| ค้นหา public ไม่พบ | เลือกปีแล้ว, status เป็น `active`, visibility เป็น `public`, ตัวกรองถูกต้อง |
+| ไม่มีปุ่มแก้ไข/ลบ | ต้องเป็นเจ้าของกิจกรรมหรือ Admin และกิจกรรมอยู่ในช่วงปีที่แก้ไขได้ |
+| กิจกรรมแสดงว่าอ่านอย่างเดียว | กิจกรรมเก่ากว่าปีปัจจุบันย้อนหลังสองปี จึงแก้ไขและอัปโหลดเพิ่มไม่ได้ |
 | เปิด Drive แล้วขอ Login | root/child sharing ต้องเป็น Anyone with link Viewer |
 | จำนวนไฟล์ไม่ตรง | มี manual upload/delete; ระบบไม่ scan Drive อัตโนมัติ |
 | Public Search ช้าเป็นบางครั้ง | Apps Script cold start; ลองใหม่และพิจารณา CacheService |
@@ -292,6 +336,16 @@ uploaded_at
 updated_at
 last_uploaded_by
 activity_status
+visibility
+```
+
+คอลัมน์ `visibility` ต้องอยู่คอลัมน์ R ค่าใช้ได้คือ `public` หรือ `internal`
+
+`activity_status` และ `visibility` เป็นคนละเรื่อง:
+
+```text
+activity_status = active | archived
+visibility      = public | internal
 ```
 
 6. สร้าง tab ชื่อ `allowed_users`
@@ -305,6 +359,9 @@ notes
 ```
 
 8. เพิ่ม uploader หนึ่งคนต่อหนึ่งแถว โดย `is_active` ใช้ `TRUE`
+9. ไม่จำเป็นต้องสร้าง `activity_audit` เอง ฟังก์ชัน migration จะสร้างพร้อม header ให้
+
+`activity_audit` เก็บ `audit_id`, `upload_id`, `folder_id`, `action`, `actor_email`, `occurred_at`, `before_json`, `after_json`, `result` และ `error_message` ห้ามเปิดข้อมูลชีตนี้ผ่าน public API
 
 ## 3.4 สร้าง Google Cloud project และ OAuth client
 
@@ -331,7 +388,7 @@ https://YOUR-GITHUB-USERNAME.github.io
 
 1. เข้า [script.google.com](https://script.google.com/)
 2. สร้าง **New project**
-3. เปิดไฟล์ [`starter/Code.gs`](starter/Code.gs)
+3. เปิดไฟล์ [`Code.gs`](Code.gs)
 4. คัดลอกโค้ดทั้งหมดไปแทน `Code.gs` ใน Apps Script
 5. แก้ค่า config:
 
@@ -349,11 +406,13 @@ GOOGLE_CLIENT_ID = OAuth Client ID จากขั้นตอนก่อนห
 ```
 
 8. บันทึก project
-9. กด **Deploy → New deployment → Web app**
-10. ตั้ง **Execute as: Me** หรือเจ้าของระบบ
-11. ตั้ง access ให้ endpoint ถูกเรียกจาก GitHub Pages ได้ โดย public MVP ต้องเข้าถึงได้แบบ Anyone
-12. กด Deploy และอนุญาตสิทธิ์ Script
-13. คัดลอก URL ที่ลงท้ายด้วย `/exec`
+9. เลือกฟังก์ชัน `setupActivityManagement()` แล้วกด Run หนึ่งครั้ง เพื่อเพิ่ม/backfill `visibility` และสร้าง `activity_audit`
+10. ตรวจว่า `uploads!R1` เป็น `visibility`, แถวเดิมเป็น `public` และมี tab `activity_audit`
+11. กด **Deploy → New deployment → Web app**
+12. ตั้ง **Execute as: Me** หรือเจ้าของระบบ
+13. ตั้ง access ให้ endpoint ถูกเรียกจาก GitHub Pages ได้ โดย public search ต้องเข้าถึงได้แบบ Anyone
+14. กด Deploy และอนุญาตสิทธิ์ Script
+15. คัดลอก URL ที่ลงท้ายด้วย `/exec`
 
 เมื่อแก้ `Code.gs` ภายหลัง ต้องเข้า **Deploy → Manage deployments → Edit → New version → Deploy** การกด Save อย่างเดียวไม่อัปเดต production deployment
 
@@ -368,7 +427,7 @@ APPS_SCRIPT_URL: "YOUR_APPS_SCRIPT_EXEC_URL"
 GOOGLE_CLIENT_ID: "YOUR_GOOGLE_CLIENT_ID"
 ```
 
-ปรับ `UPLOAD_YEARS`, `CATEGORIES` และ `ACTIVITY_PRESETS` ให้ตรงกับองค์กร
+ปรับ `CATEGORIES` และ `ACTIVITY_PRESETS` ให้ตรงกับองค์กร ปีที่สร้าง/แก้ไขได้คำนวณอัตโนมัติตามเวลา Bangkok ไม่ใช้รายการ `UPLOAD_YEARS`
 
 ### `public/index.html`
 
@@ -409,7 +468,7 @@ repository/
 |---|---|---|---|
 | Owner | Execute as owner | Owner | Admin |
 | Uploader | เรียก API ด้วย ID token | Editor | อยู่ใน allowlist |
-| Public visitor | เรียกเฉพาะ `publicSearch` | Viewer ผ่าน link | ไม่ต้องล็อกอิน |
+| Public visitor | เรียกเฉพาะ `publicSearch`/`publicLatest` | Viewer ผ่าน link | ไม่ต้องล็อกอิน |
 
 ห้ามทำ POST action เป็น public และห้ามนำ uploader identity ไปใส่ใน public response
 
@@ -423,25 +482,35 @@ repository/
 - [ ] อัปโหลดไฟล์เข้า Drive ได้
 - [ ] metadata ถูกเพิ่มหนึ่งแถว
 - [ ] authenticated search หาเจอ
+- [ ] authenticated search บังคับเลือกปีและจำกัดผล 50 รายการ
 - [ ] append upload เพิ่มไฟล์และ file count ได้
+- [ ] uploader ที่อัปโหลดเพิ่มไม่สามารถแก้ไขหรือลบกิจกรรมของเจ้าของเดิม
+- [ ] เจ้าของและ Admin แก้ชื่อ วันที่ หมวด และ visibility ได้ในช่วงสามปี
+- [ ] การย้ายรักษา folder ID, URL และไฟล์เดิม
+- [ ] destination collision เติม `(1)`, `(2)` โดยไม่ merge
+- [ ] soft delete ซ่อนรายการแต่ไม่ลบ Drive และ Admin กู้คืนได้
+- [ ] กิจกรรมเก่าแสดงแบบ read-only และอัปโหลดเพิ่มไม่ได้
 - [ ] POST ที่ไม่มี ID token ถูกปฏิเสธ
 
 ### Public regression
 
 - [ ] `/public/` เปิดใน Incognito ได้
+- [ ] dashboard ล่าสุดแสดงไม่เกิน 10 กิจกรรม active/public
 - [ ] ค้นหาปี/เดือน/วัน/หมวดได้
+- [ ] การค้นหาบังคับเลือกปี
 - [ ] ค้นหาคำไทยบางส่วนได้
-- [ ] inactive activity ไม่ปรากฏ
+- [ ] archived และ internal activity ไม่ปรากฏ
 - [ ] JSON ไม่มีอีเมลหรือชื่อ uploader
-- [ ] empty query ไม่ dump ทั้ง Sheet
 - [ ] ผลลัพธ์ไม่เกิน 50 รายการ
 - [ ] เปิดและดาวน์โหลดไฟล์จาก Drive โดยไม่ล็อกอินได้
 
 ## 3.10 การดูแลระยะยาว
 
 - Backup Spreadsheet และตรวจ permission เป็นระยะ
-- เก็บกิจกรรม private แยก root จาก public
+- ตรวจว่า `internal` ไม่ปรากฏบนเว็บสาธารณะ และจำไว้ว่ายังเป็น unlisted ไม่ใช่ Drive private
+- เก็บข้อมูลลับจริงใน root/permission แยก
 - เพิ่ม/ปิด uploader ผ่าน `allowed_users`
+- ตรวจ `activity_audit` เมื่อมีการแก้ไข ย้าย เปลี่ยน visibility ลบ หรือกู้คืน
 - เปลี่ยน deployment version ทุกครั้งที่แก้ backend
 - หลีกเลี่ยง manual upload ใน managed root
 - เมื่อข้อมูลโต ให้เพิ่ม `CacheService` ก่อนพิจารณาเปลี่ยนฐานข้อมูล
@@ -453,23 +522,25 @@ Functional MVP ที่ยืนยันแล้ว:
 
 - uploader login/create/upload/metadata flow ทำงาน
 - admin-only allowed user management มี backend authorization แยกจากการซ่อนปุ่มใน UI
-- public search endpoint ทำงานโดยไม่ต้อง authentication
+- owner/Admin edit, move, visibility, soft delete และ Admin restore ทำงาน
+- duplicate guard, collision suffix และ compensating rollback มี regression tests
+- public search และ latest dashboard ทำงานโดยไม่ต้อง authentication
+- public endpoint กรอง archived/internal และไม่เผย uploader identity
 - public Drive folder เปิดแบบ no-session ได้
 - protected GET/POST actions ยังปฏิเสธ request ที่ไม่มี token
 - frontend แยก uploader และ public search แล้ว
 
-ก่อนประกาศ Stable Baseline v1 ควรทดสอบ append upload และ anonymous file download ซ้ำใน browser จริง หลังจากนั้นสามารถ redesign UI/UX ได้โดย freeze API contract และ permission boundary ตามเอกสารนี้
+การ deploy backend ต้องสร้าง Apps Script version ใหม่ ส่วนการแก้ `index.html`, `public/index.html` หรือ `guide.html` ใช้การ deploy GitHub Pages เท่านั้น
 
 ## 3.12 แนวทางต่อยอด
 
 ลำดับที่แนะนำ:
 
-1. Freeze functional baseline และ regression checklist
-2. Redesign ทุก page/state โดยไม่เปลี่ยน API contract
-3. เพิ่ม CacheService พร้อม invalidation หลัง save/append
-4. เพิ่ม metadata edit/admin UI เฉพาะเมื่อมี policy ชัดเจน
-5. เพิ่ม `public_visibility` และ public root แยก หากต้องรองรับข้อมูลผสม public/private
-6. เพิ่ม file-level metadata เฉพาะเมื่อจำเป็นต้องมี gallery หรือ download รายไฟล์
+1. เพิ่ม CacheService พร้อม invalidation หลัง mutation เมื่อข้อมูลโต
+2. เพิ่มเครื่องมือตรวจ duplicate/orphan สำหรับ Admin
+3. เพิ่ม workflow จัดการไฟล์/metadata ที่อัปโหลดสำเร็จแต่การบันทึก metadata ล้มเหลว
+4. เพิ่ม file-level metadata เฉพาะเมื่อจำเป็นต้องมี gallery หรือ download รายไฟล์
+5. พิจารณา root/permission แยก หากต้องรองรับข้อมูลลับจริง
 
 ## 3.13 UI/UX design system
 
