@@ -374,7 +374,8 @@ async function handleNewUpload() {
       activityName: payload.activityName
     });
 
-    await uploadBatch(state.newFiles, folder.folderId, "อัปโหลดกิจกรรมใหม่");
+    const uploadedFiles = await uploadBatch(state.newFiles, folder.folderId, "อัปโหลดกิจกรรมใหม่");
+    const coverFile = chooseCoverFile(uploadedFiles);
 
     showOverlay("กำลังบันทึกข้อมูลกิจกรรม", 92);
     await apiPost({
@@ -392,6 +393,7 @@ async function handleNewUpload() {
       folderPath: folder.folderPath,
       visibility: payload.visibility,
       fileCount: state.newFiles.length,
+      coverFileId: coverFile ? coverFile.id : "",
       uploadMode: "new"
     });
 
@@ -414,7 +416,8 @@ async function handleAppendUpload() {
   appendButton.disabled = true;
   appendButton.textContent = "กำลังอัปโหลด...";
   try {
-    await uploadBatch(state.appendFiles, state.appendTarget.folderId, "อัปโหลดเพิ่ม");
+    const uploadedFiles = await uploadBatch(state.appendFiles, state.appendTarget.folderId, "อัปโหลดเพิ่ม");
+    const coverFile = chooseCoverFile(uploadedFiles);
 
     showOverlay("กำลังอัปเดตข้อมูลกิจกรรม", 94);
     await apiPost({
@@ -423,7 +426,8 @@ async function handleAppendUpload() {
       userEmail: state.currentUser.email,
       userName: state.currentUser.name,
       folderId: state.appendTarget.folderId,
-      fileCountDelta: state.appendFiles.length
+      fileCountDelta: state.appendFiles.length,
+      coverFileId: coverFile ? coverFile.id : ""
     });
 
     hideOverlay();
@@ -441,17 +445,24 @@ async function handleAppendUpload() {
 
 async function uploadBatch(files, folderId, title) {
   let completed = 0;
+  const uploadedFiles = [];
   for (const file of files) {
     const progress = Math.round((completed / files.length) * 72) + 18;
     showOverlay(`${title}: ${completed + 1}/${files.length} - ${file.name}`, progress);
-    await uploadFileToDrive(file, folderId);
+    uploadedFiles.push(await uploadFileToDrive(file, folderId));
     completed += 1;
   }
+  return uploadedFiles;
+}
+
+function chooseCoverFile(files) {
+  return files.find((file) => String(file.mimeType || "").startsWith("image/")) ||
+    files.find((file) => String(file.mimeType || "").startsWith("video/")) || null;
 }
 
 async function uploadFileToDrive(file, folderId) {
   const token = state.accessToken;
-  const initRes = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable", {
+  const initRes = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id%2Cname%2CmimeType", {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${token}`,
@@ -488,6 +499,9 @@ async function uploadFileToDrive(file, folderId) {
   }
 
   if (!uploadRes.ok) throw new Error(`อัปโหลดไฟล์ไม่สำเร็จ (${uploadRes.status})`);
+  const uploaded = await uploadRes.json();
+  if (!uploaded.id) throw new Error("Google Drive ไม่ส่ง file ID กลับมา");
+  return { id: uploaded.id, name: uploaded.name || file.name, mimeType: uploaded.mimeType || file.type || "" };
 }
 
 async function refreshDriveToken() {
@@ -561,7 +575,7 @@ function renderSearchResults(results) {
   results.forEach((item) => {
     const card = document.createElement("article");
     card.className = "result-card";
-    const cover = createCategoryCover(item.category, "./assets/covers/");
+    const cover = createActivityCover(item, "./assets/covers/");
     const body = document.createElement("div");
     body.className = "result-card-body";
     const head = document.createElement("div");
@@ -603,18 +617,30 @@ function renderSearchResults(results) {
   });
 }
 
-function createCategoryCover(category, basePath) {
+function createActivityCover(item, basePath) {
   const cover = document.createElement("div");
   cover.className = "result-cover";
   const image = document.createElement("img");
-  image.src = `${basePath}${CATEGORY_COVER_FILES.get(category) || "activity.svg"}`;
-  image.alt = `ภาพประกอบหมวด ${category || "กิจกรรม"}`;
+  const fallback = `${basePath}${CATEGORY_COVER_FILES.get(item.category) || "activity.svg"}`;
+  const hasPreview = isSafeDriveThumbnailUrl(item.coverUrl);
+  image.src = hasPreview ? item.coverUrl : fallback;
+  image.alt = hasPreview ? `ภาพตัวอย่าง ${item.activityName || "กิจกรรม"}` : `ภาพประกอบหมวด ${item.category || "กิจกรรม"}`;
+  if (hasPreview) image.addEventListener("error", () => { image.src = fallback; }, { once: true });
   image.width = 320;
   image.height = 200;
   image.loading = "lazy";
   image.decoding = "async";
   cover.appendChild(image);
   return cover;
+}
+
+function isSafeDriveThumbnailUrl(value) {
+  try {
+    const url = new URL(String(value || ""));
+    return url.protocol === "https:" && url.hostname === "drive.google.com" && url.pathname === "/thumbnail";
+  } catch (error) {
+    return false;
+  }
 }
 
 function addResultPill(container, text, variant = "") {

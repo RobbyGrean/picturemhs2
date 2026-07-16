@@ -376,7 +376,7 @@
       results.forEach((item) => {
         const card = document.createElement("article");
         card.className = "result-card";
-        const cover = createCategoryCover(item.category, "../assets/covers/");
+        const cover = createActivityCover(item, "../assets/covers/");
         const body = document.createElement("div");
         body.className = "result-card-body";
 
@@ -416,18 +416,30 @@
       });
     }
 
-    function createCategoryCover(category, basePath) {
+    function createActivityCover(item, basePath) {
       const cover = document.createElement("div");
       cover.className = "result-cover";
       const image = document.createElement("img");
-      image.src = `${basePath}${CATEGORY_COVER_FILES.get(category) || "activity.svg"}`;
-      image.alt = `ภาพประกอบหมวด ${category || "กิจกรรม"}`;
+      const fallback = `${basePath}${CATEGORY_COVER_FILES.get(item.category) || "activity.svg"}`;
+      const hasPreview = isSafeDriveThumbnailUrl(item.coverUrl);
+      image.src = hasPreview ? item.coverUrl : fallback;
+      image.alt = hasPreview ? `ภาพตัวอย่าง ${item.activityName || "กิจกรรม"}` : `ภาพประกอบหมวด ${item.category || "กิจกรรม"}`;
+      if (hasPreview) image.addEventListener("error", () => { image.src = fallback; }, { once: true });
       image.width = 320;
       image.height = 200;
       image.loading = "lazy";
       image.decoding = "async";
       cover.appendChild(image);
       return cover;
+    }
+
+    function isSafeDriveThumbnailUrl(value) {
+      try {
+        const url = new URL(String(value || ""));
+        return url.protocol === "https:" && url.hostname === "drive.google.com" && url.pathname === "/thumbnail";
+      } catch (error) {
+        return false;
+      }
     }
 
     function formatThaiDate(item) {

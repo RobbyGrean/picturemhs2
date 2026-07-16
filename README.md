@@ -106,7 +106,7 @@ PICMHS2 แยกสิทธิ์ผู้ใช้ออกเป็นสา
 - บังคับเลือกปี พ.ศ. ก่อนค้นหา ส่วนเดือน วัน หมวด และชื่อกิจกรรมเป็นตัวเลือก
 - แสดงเฉพาะ `activity_status = active` และ `visibility = public`
 - เปิดโฟลเดอร์รูปใน Google Drive
-- แสดงภาพประกอบหมวดแบบ SVG ในผลค้นหาและกิจกรรมล่าสุด โดยใช้ `loading="lazy"` และไม่เรียก Drive API เพิ่ม
+- แสดง thumbnail จากภาพ/วิดีโอแรกของกิจกรรม และ fallback เป็นภาพประกอบหมวด SVG โดยใช้ `loading="lazy"` โดยไม่สแกน Drive ระหว่างค้นหา
 - ไม่มี upload, create folder, metadata write หรือ administration capability
 
 ## 1.3 🧩 สถาปัตยกรรม
@@ -400,9 +400,11 @@ updated_at
 last_uploaded_by
 activity_status
 visibility
+cover_file_id
 ```
 
 คอลัมน์ `visibility` ต้องอยู่คอลัมน์ R ค่าใช้ได้คือ `public` หรือ `internal`
+คอลัมน์ `cover_file_id` ต้องอยู่คอลัมน์ S เก็บ Drive file ID ของภาพหรือวิดีโอตัวแทนกิจกรรม; ค่า `none` หมายถึงตรวจแล้วไม่พบสื่อที่ทำ thumbnail ได้
 
 `activity_status` และ `visibility` เป็นคนละเรื่อง:
 
@@ -451,7 +453,7 @@ https://YOUR-GITHUB-USERNAME.github.io
 
 1. เข้า [script.google.com](https://script.google.com/)
 2. สร้าง **New project**
-3. เปิดไฟล์ [`Code.gs`](Code.gs)
+3. เปิดไฟล์ [`starter/Code.gs`](starter/Code.gs)
 4. คัดลอกโค้ดทั้งหมดไปแทน `Code.gs` ใน Apps Script
 5. แก้ค่า config:
 
@@ -469,13 +471,14 @@ GOOGLE_CLIENT_ID = OAuth Client ID จากขั้นตอนก่อนห
 ```
 
 8. บันทึก project
-9. เลือกฟังก์ชัน `setupActivityManagement()` แล้วกด Run หนึ่งครั้ง เพื่อเพิ่ม/backfill `visibility` และสร้าง `activity_audit`
-10. ตรวจว่า `uploads!R1` เป็น `visibility`, แถวเดิมเป็น `public` และมี tab `activity_audit`
-11. กด **Deploy → New deployment → Web app**
-12. ตั้ง **Execute as: Me** หรือเจ้าของระบบ
-13. ตั้ง access ให้ endpoint ถูกเรียกจาก GitHub Pages ได้ โดย public search ต้องเข้าถึงได้แบบ Anyone
-14. กด Deploy และอนุญาตสิทธิ์ Script
-15. คัดลอก URL ที่ลงท้ายด้วย `/exec`
+9. เลือกฟังก์ชัน `setupActivityManagement()` แล้วกด Run หนึ่งครั้ง เพื่อเพิ่ม/backfill `visibility`, เพิ่ม `cover_file_id` และสร้าง `activity_audit`
+10. ตรวจว่า `uploads!R1` เป็น `visibility`, `uploads!S1` เป็น `cover_file_id`, แถวเดิมมี visibility เป็น `public` และมี tab `activity_audit`
+11. สำหรับกิจกรรมเก่า ให้เลือก `backfillActivityCovers` แล้วกด Run; ฟังก์ชันตรวจสูงสุด 100 กิจกรรมต่อครั้ง ให้รันซ้ำจน `pending` เป็น 0 และตรวจรายการ `errors` หากมี
+12. กด **Deploy → New deployment → Web app**
+13. ตั้ง **Execute as: Me** หรือเจ้าของระบบ
+14. ตั้ง access ให้ endpoint ถูกเรียกจาก GitHub Pages ได้ โดย public search ต้องเข้าถึงได้แบบ Anyone
+15. กด Deploy และอนุญาตสิทธิ์ Script
+16. คัดลอก URL ที่ลงท้ายด้วย `/exec`
 
 เมื่อแก้ `Code.gs` ภายหลัง ต้องเข้า **Deploy → Manage deployments → Edit → New version → Deploy** การกด Save อย่างเดียวไม่อัปเดต production deployment
 
@@ -627,7 +630,7 @@ Functional MVP ที่ยืนยันแล้ว:
 - card radius ระดับกลาง, border บาง และ shadow เบาเฉพาะจุดที่ต้องการลำดับชั้น
 - focus ring 3px, status แยก info/success/warning/error ด้วยข้อความและสัญลักษณ์ ไม่ใช้สีเพียงอย่างเดียว
 - mobile-first ตั้งแต่ 320px, รองรับ zoom 200% และ `prefers-reduced-motion`
-- result card ใช้ภาพประกอบหมวด SVG อัตราส่วน 8:5 พร้อมกำหนด `width`/`height`, `decoding="async"` และ lazy-load เพื่อลด layout shift และภาระเครือข่าย
+- result card ใช้ Drive thumbnail ที่บันทึกไว้ใน `cover_file_id`; ถ้าไม่มีหรือเปิดไม่ได้จะ fallback เป็น SVG อัตราส่วน 8:5 พร้อม `width`/`height`, `decoding="async"` และ lazy-load
 
 Component หลักที่ใช้ร่วมกัน ได้แก่ header/navigation, button, form field, tabs, panel/card, status banner, file item, result card, user card, empty state และ progress dialog
 

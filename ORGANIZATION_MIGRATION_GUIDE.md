@@ -72,7 +72,7 @@ publicSearch
 publicLatest
 ```
 
-ถ้า repository มีเพียง `starter/Code.gs` ให้ตรวจว่ามีฟังก์ชันข้างต้นครบก่อนใช้ ห้าม deploy starter รุ่นเก่าที่ไม่มี Activity Management
+ไฟล์ `starter/Code.gs` ปัจจุบันเป็น template ของ backend รุ่นเดียวกับ production แต่ต้องแทน Drive folder ID, Spreadsheet ID, Admin emails และ Script Property ก่อน deploy
 
 ## 4. สร้าง Google Drive ของหน่วยงาน
 
