@@ -198,9 +198,10 @@
     <section class="panel latest-panel" aria-labelledby="latestHeading">
       <div class="panel-head">
         <h2 id="latestHeading">กิจกรรมล่าสุด</h2>
-        <p>สูงสุด 10 กิจกรรมที่เผยแพร่ เรียงตามวันที่กิจกรรมล่าสุด</p>
+        <p>สูงสุด 3 กิจกรรมที่เผยแพร่ เรียงตามวันที่กิจกรรมล่าสุด</p>
       </div>
       <div class="status" id="latestStatus" role="status" aria-live="polite">กำลังโหลดกิจกรรมล่าสุด...</div>
+      <button class="button" id="retryLatestButton" type="button" hidden>ลองโหลดกิจกรรมล่าสุดอีกครั้ง</button>
       <div class="results" id="latestResults" aria-label="กิจกรรมล่าสุด" aria-busy="true"></div>
     </section>
 
@@ -248,6 +249,7 @@
     const CONFIG = {
       API_URL: "https://script.google.com/macros/s/AKfycbzDyucuarduxEiLv-s4mpgoeJ6cKrx77nMPlc30-tb82z3DDsLPgVcqO1zSSwV5WXBZig/exec",
       REQUEST_TIMEOUT_MS: 15000,
+      LATEST_RETRY_TIMEOUT_MS: 30000,
       PUBLIC_YEAR_MIN: 2567,
       CURRENT_YEAR_BE: Number(new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Bangkok", year: "numeric" }).format(new Date())) + 543,
       CATEGORIES: ["กิจกรรมและอื่นๆ", "ไปราชการ", "ประชุม"],
@@ -265,6 +267,7 @@
     const resultsBox = document.getElementById("results");
     const latestStatusBox = document.getElementById("latestStatus");
     const latestResultsBox = document.getElementById("latestResults");
+    const retryLatestButton = document.getElementById("retryLatestButton");
     const searchButton = document.getElementById("searchButton");
 
     seedOptions();
@@ -272,6 +275,7 @@
     document.getElementById("clearButton").addEventListener("click", clearFilters);
     document.getElementById("yearBE").addEventListener("change", syncDays);
     document.getElementById("month").addEventListener("change", syncDays);
+    retryLatestButton.addEventListener("click", loadLatest);
     loadLatest();
 
     function seedOptions() {
@@ -340,8 +344,19 @@
 
     async function loadLatest() {
       latestResultsBox.setAttribute("aria-busy", "true");
+      retryLatestButton.hidden = true;
+      latestStatusBox.dataset.type = "info";
+      latestStatusBox.textContent = "กำลังโหลดกิจกรรมล่าสุด...";
       try {
-        const data = await fetchJson(`${CONFIG.API_URL}?action=publicLatest`, CONFIG.REQUEST_TIMEOUT_MS);
+        const url = `${CONFIG.API_URL}?action=publicLatest`;
+        let data;
+        try {
+          data = await fetchJson(url, CONFIG.REQUEST_TIMEOUT_MS);
+        } catch (error) {
+          if (!isTransientFetchError(error)) throw error;
+          latestStatusBox.textContent = "ระบบตอบช้ากว่าปกติ กำลังลองอีกครั้ง...";
+          data = await fetchJson(url, CONFIG.LATEST_RETRY_TIMEOUT_MS);
+        }
         if (!data.ok) throw new Error(toThaiApiError(data.error));
         const results = Array.isArray(data.results) ? data.results : [];
         renderResults(results, latestResultsBox);
@@ -350,9 +365,14 @@
       } catch (error) {
         latestStatusBox.dataset.type = "error";
         latestStatusBox.textContent = error.name === "AbortError" ? "โหลดกิจกรรมล่าสุดใช้เวลานานเกินไป" : error.message;
+        retryLatestButton.hidden = false;
       } finally {
         latestResultsBox.setAttribute("aria-busy", "false");
       }
+    }
+
+    function isTransientFetchError(error) {
+      return error && (error.name === "AbortError" || error instanceof TypeError);
     }
 
     async function fetchJson(url, timeoutMs) {

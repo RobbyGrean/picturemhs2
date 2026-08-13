@@ -347,7 +347,7 @@ https://YOUR-USERNAME.github.io/YOUR-REPOSITORY/guide.html
 - Login/logout
 - upload ใหม่
 - append files
-- public latest สูงสุด 10 รายการ
+- public latest สูงสุด 3 รายการ
 - responsive 320px และ desktop
 - ปุ่ม/Modal/Escape/กากบาททำงาน
 

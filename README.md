@@ -39,7 +39,7 @@ PICMHS2 เป็น Web App แบบ serverless ใช้ GitHub Pages เป�
 | 🔐 Uploader | 🗂️ Activity Management | 🌍 Public Search | ☁️ Google-native |
 |---|---|---|---|
 | Google Sign-In + allowlist | แก้ไข ย้าย ซ่อน ลบ และกู้คืน | ไม่ต้องล็อกอิน | ไม่ต้องดูแล server |
-| อัปโหลดหลายไฟล์ | รักษา folder ID และ URL | กิจกรรมล่าสุด 10 รายการ | Drive + Sheets + Apps Script |
+| อัปโหลดหลายไฟล์ | รักษา folder ID และ URL | กิจกรรมล่าสุด 3 รายการ | Drive + Sheets + Apps Script |
 | เพิ่มไฟล์ในกิจกรรมเดิม | owner/Admin authorization | กรองเฉพาะ active/public | GitHub Pages frontend |
 
 ## 🗺️ สารบัญ
@@ -102,7 +102,7 @@ PICMHS2 แยกสิทธิ์ผู้ใช้ออกเป็นสา
 
 - ไม่โหลด Google Identity Services
 - ไม่ขอ Drive OAuth token
-- แสดงกิจกรรมล่าสุดที่เผยแพร่สูงสุด 10 รายการ
+- แสดงกิจกรรมล่าสุดที่เผยแพร่สูงสุด 3 รายการ
 - บังคับเลือกปี พ.ศ. ก่อนค้นหา ส่วนเดือน วัน หมวด และชื่อกิจกรรมเป็นตัวเลือก
 - แสดงเฉพาะ `activity_status = active` และ `visibility = public`
 - เปิดโฟลเดอร์รูปใน Google Drive
@@ -218,7 +218,7 @@ Uploader ปกติต้องผ่านสามชั้น:
 ## 2.1 🔎 สำหรับผู้ค้นหารูปทั่วไป
 
 1. เปิด URL `/public/`
-2. ดูกิจกรรมล่าสุดที่เผยแพร่ได้ทันที สูงสุด 10 รายการ
+2. ดูกิจกรรมล่าสุดที่เผยแพร่ได้ทันที สูงสุด 3 รายการ
 3. เมื่อต้องการค้นหา ให้เลือกปี พ.ศ. ก่อนทุกครั้ง
 4. เลือกเดือน วัน หรือหมวดเพิ่มเติมได้ตามข้อมูลที่ทราบ
 5. พิมพ์ชื่อกิจกรรมเต็มหรือคำบางส่วนได้
@@ -326,7 +326,7 @@ Uploader ทั่วไปจะไม่เห็นแท็บนี้ แ�
 | กิจกรรมแสดงว่าอ่านอย่างเดียว | กิจกรรมเก่ากว่าปีปัจจุบันย้อนหลังสองปี จึงแก้ไขและอัปโหลดเพิ่มไม่ได้ |
 | เปิด Drive แล้วขอ Login | root/child sharing ต้องเป็น Anyone with link Viewer |
 | จำนวนไฟล์ไม่ตรง | มี manual upload/delete; ระบบไม่ scan Drive อัตโนมัติ |
-| Public Search ช้าเป็นบางครั้ง | Apps Script cold start; ลองใหม่และพิจารณา CacheService |
+| Recent Activities / Public Search ช้าเป็นบางครั้ง | Apps Script อาจ cold start; Recent Activities จะ retry อัตโนมัติหนึ่งครั้ง และมีปุ่มให้ลองใหม่หากยังไม่สำเร็จ |
 | ไม่เห็นแท็บจัดการ uploader | ต้อง Login ใหม่ด้วยอีเมลที่อยู่ใน `CONFIG.ADMIN_EMAILS` |
 
 <p align="right"><a href="#top">⬆️ กลับด้านบน</a></p>
@@ -570,7 +570,7 @@ repository/
 ### Public regression
 
 - [ ] `/public/` เปิดใน Incognito ได้
-- [ ] dashboard ล่าสุดแสดงไม่เกิน 10 กิจกรรม active/public
+- [ ] dashboard ล่าสุดแสดงไม่เกิน 3 กิจกรรม active/public
 - [ ] ค้นหาปี/เดือน/วัน/หมวดได้
 - [ ] การค้นหาบังคับเลือกปี
 - [ ] ค้นหาคำไทยบางส่วนได้
