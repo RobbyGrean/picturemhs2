@@ -325,7 +325,9 @@
           if (normalized) params.set(key, normalized);
         });
 
-        const data = await fetchJson(`${CONFIG.API_URL}?${params}`, CONFIG.REQUEST_TIMEOUT_MS);
+        const data = await fetchJsonWithRetry(`${CONFIG.API_URL}?${params}`, () => {
+          showStatus("ระบบตอบผิดปกติชั่วคราว กำลังลองค้นหาอีกครั้ง...", "info");
+        });
         if (!data.ok) throw new Error(toThaiApiError(data.error));
         renderResults(Array.isArray(data.results) ? data.results : [], resultsBox);
 
@@ -348,15 +350,9 @@
       latestStatusBox.dataset.type = "info";
       latestStatusBox.textContent = "กำลังโหลดกิจกรรมล่าสุด...";
       try {
-        const url = `${CONFIG.API_URL}?action=publicLatest`;
-        let data;
-        try {
-          data = await fetchJson(url, CONFIG.REQUEST_TIMEOUT_MS);
-        } catch (error) {
-          if (!isTransientFetchError(error)) throw error;
+        const data = await fetchJsonWithRetry(`${CONFIG.API_URL}?action=publicLatest`, () => {
           latestStatusBox.textContent = "ระบบตอบช้ากว่าปกติ กำลังลองอีกครั้ง...";
-          data = await fetchJson(url, CONFIG.LATEST_RETRY_TIMEOUT_MS);
-        }
+        });
         if (!data.ok) throw new Error(toThaiApiError(data.error));
         const results = Array.isArray(data.results) ? data.results : [];
         renderResults(results, latestResultsBox);
@@ -372,7 +368,10 @@
     }
 
     function isTransientFetchError(error) {
-      return error && (error.name === "AbortError" || error instanceof TypeError);
+      if (!error) return false;
+      const status = Number(error.httpStatus || 0);
+      return error.name === "AbortError" || error instanceof TypeError ||
+        status === 404 || status === 408 || status === 429 || status >= 500;
     }
 
     async function fetchJson(url, timeoutMs) {
@@ -380,7 +379,11 @@
       const timer = setTimeout(() => controller.abort(), timeoutMs);
       try {
         const response = await fetch(url, { signal: controller.signal });
-        if (!response.ok) throw new Error(`เชื่อมต่อระบบค้นหาไม่สำเร็จ (${response.status})`);
+        if (!response.ok) {
+          const httpError = new Error(`เชื่อมต่อระบบค้นหาไม่สำเร็จ (${response.status})`);
+          httpError.httpStatus = response.status;
+          throw httpError;
+        }
         return await response.json();
       } catch (error) {
         if (error.name === "AbortError") throw error;
@@ -388,6 +391,17 @@
         throw error;
       } finally {
         clearTimeout(timer);
+      }
+    }
+
+    async function fetchJsonWithRetry(url, onRetry) {
+      try {
+        return await fetchJson(url, CONFIG.REQUEST_TIMEOUT_MS);
+      } catch (error) {
+        if (!isTransientFetchError(error)) throw error;
+        if (onRetry) onRetry(error);
+        const separator = url.includes("?") ? "&" : "?";
+        return fetchJson(`${url}${separator}_retry=${Date.now()}`, CONFIG.LATEST_RETRY_TIMEOUT_MS);
       }
     }
 

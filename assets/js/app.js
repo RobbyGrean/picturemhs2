@@ -378,7 +378,7 @@ async function handleNewUpload() {
     const coverFile = chooseCoverFile(uploadedFiles);
 
     showOverlay("กำลังบันทึกข้อมูลกิจกรรม", 92);
-    await apiPost({
+    const metadataRequest = {
       action: "saveMetadata",
       idToken: await getFreshIdToken(),
       userEmail: state.currentUser.email,
@@ -395,7 +395,17 @@ async function handleNewUpload() {
       fileCount: state.newFiles.length,
       coverFileId: coverFile ? coverFile.id : "",
       uploadMode: "new"
-    });
+    };
+    try {
+      await apiPost(metadataRequest);
+    } catch (error) {
+      if (!error.isAmbiguousApiResponse) throw error;
+      showOverlay("ไฟล์ขึ้น Drive แล้ว กำลังยืนยันการบันทึกข้อมูล", 96);
+      const confirmed = await confirmActivityMetadata(folder.folderId, metadataRequest, state.newFiles.length);
+      if (!confirmed) {
+        throw new Error("ไฟล์อัปโหลดขึ้น Drive แล้ว แต่ยังยืนยันการบันทึกกิจกรรมไม่ได้ กรุณารอครู่หนึ่งแล้วค้นหาชื่อกิจกรรมก่อนลองอัปโหลดซ้ำ");
+      }
+    }
 
     hideOverlay();
     showStatus("uploadStatus", "success", `อัปโหลดสำเร็จ ${state.newFiles.length} ไฟล์`);
@@ -420,7 +430,7 @@ async function handleAppendUpload() {
     const coverFile = chooseCoverFile(uploadedFiles);
 
     showOverlay("กำลังอัปเดตข้อมูลกิจกรรม", 94);
-    await apiPost({
+    const appendRequest = {
       action: "appendMetadata",
       idToken: await getFreshIdToken(),
       userEmail: state.currentUser.email,
@@ -428,7 +438,18 @@ async function handleAppendUpload() {
       folderId: state.appendTarget.folderId,
       fileCountDelta: state.appendFiles.length,
       coverFileId: coverFile ? coverFile.id : ""
-    });
+    };
+    try {
+      await apiPost(appendRequest);
+    } catch (error) {
+      if (!error.isAmbiguousApiResponse) throw error;
+      showOverlay("ไฟล์ขึ้น Drive แล้ว กำลังยืนยันจำนวนไฟล์", 96);
+      const expectedCount = Number(state.appendTarget.fileCount || 0) + state.appendFiles.length;
+      const confirmed = await confirmActivityMetadata(state.appendTarget.folderId, state.appendTarget, expectedCount);
+      if (!confirmed) {
+        throw new Error("ไฟล์ใหม่ขึ้น Drive แล้ว แต่ยังยืนยันจำนวนไฟล์ในระบบไม่ได้ กรุณารอครู่หนึ่งแล้วค้นหากิจกรรมอีกครั้ง ห้ามอัปโหลดไฟล์ชุดเดิมซ้ำ");
+      }
+    }
 
     hideOverlay();
     showStatus("appendStatus", "success", `อัปโหลดเพิ่มสำเร็จ ${state.appendFiles.length} ไฟล์`);
@@ -1019,9 +1040,9 @@ async function getFreshIdToken() {
 }
 
 async function apiGet(params) {
-  const query = new URLSearchParams(params).toString();
-  const response = await fetch(`${CONFIG.APPS_SCRIPT_URL}?${query}`);
-  const data = await response.json();
+  const query = new URLSearchParams(Object.assign({ _ts: Date.now() }, params)).toString();
+  const response = await fetch(`${CONFIG.APPS_SCRIPT_URL}?${query}`, { cache: "no-store" });
+  const data = await readApiJson(response, false);
   if (!data.ok) throw new Error(data.error || "เกิดข้อผิดพลาดจากระบบ");
   return data;
 }
@@ -1040,15 +1061,58 @@ async function apiPost(body) {
     });
   } catch (error) {
     if (error.name === "AbortError") {
-      throw new Error("Apps Script ไม่ตอบสนองภายใน 30 วินาที กรุณาตรวจสอบการเผยแพร่เว็บแอป");
+      const timeoutError = new Error("Apps Script ไม่ตอบสนองภายใน 30 วินาที ระบบจะตรวจสอบว่าบันทึกสำเร็จหรือไม่");
+      timeoutError.isAmbiguousApiResponse = true;
+      throw timeoutError;
     }
-    throw new Error("เชื่อมต่อ Apps Script ไม่สำเร็จ: " + error.message);
+    const networkError = new Error("เชื่อมต่อ Apps Script ไม่สำเร็จ ระบบจะตรวจสอบว่าบันทึกสำเร็จหรือไม่");
+    networkError.isAmbiguousApiResponse = true;
+    throw networkError;
   } finally {
     clearTimeout(timeout);
   }
-  const data = await response.json();
+  const data = await readApiJson(response, true);
   if (!data.ok) throw new Error(data.error || "เกิดข้อผิดพลาดจากระบบ");
   return data;
+}
+
+async function readApiJson(response, mutationMayHaveCompleted) {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    const invalidResponse = new Error("Apps Script ตอบกลับไม่สมบูรณ์ กรุณารอสักครู่แล้วตรวจสอบผลอีกครั้ง");
+    invalidResponse.isAmbiguousApiResponse = Boolean(mutationMayHaveCompleted);
+    invalidResponse.httpStatus = response.status;
+    throw invalidResponse;
+  }
+}
+
+async function confirmActivityMetadata(folderId, activity, minimumFileCount) {
+  const delays = [0, 1500, 3000, 5000];
+  for (const delay of delays) {
+    if (delay) await wait(delay);
+    try {
+      const result = await apiGet({
+        action: "search",
+        idToken: await getFreshIdToken(),
+        yearBE: activity.yearBE,
+        category: activity.category,
+        month: activity.month,
+        day: activity.day,
+        activityName: activity.activityName
+      });
+      const match = (result.results || []).find((item) => String(item.folderId) === String(folderId));
+      if (match && Number(match.fileCount || 0) >= Number(minimumFileCount || 0)) return true;
+    } catch (error) {
+      // A later poll may succeed after Apps Script finishes the original mutation.
+    }
+  }
+  return false;
+}
+
+function wait(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
 function showOverlay(text, progress) {

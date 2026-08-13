@@ -173,7 +173,21 @@ function handleCreateFolder(identity, payload) {
     if (findActiveByKey(rows, header, key)) throw new Error("activity already exists; use Search / Upload More");
 
     const destination = resolveDayFolder(input);
-    if (folderNameExists(destination.dayFolder, input.activityName, "")) {
+    const matchingFolders = destination.dayFolder.getFoldersByName(input.activityName);
+    if (matchingFolders.hasNext()) {
+      const existingFolder = matchingFolders.next();
+      const existingMetadata = findByFolderId(rows, header, existingFolder.getId());
+      const folderIsEmpty = !existingFolder.getFiles().hasNext() && !existingFolder.getFolders().hasNext();
+      if (!existingMetadata && folderIsEmpty) {
+        return ok({
+          folderId: existingFolder.getId(),
+          folderUrl: existingFolder.getUrl(),
+          folderPath: buildFolderPath(input),
+          activityName: input.activityName,
+          activityKey: key,
+          reusedPendingFolder: true
+        });
+      }
       throw new Error("activity folder already exists; use Search / Upload More or contact Admin");
     }
     const activityFolder = destination.dayFolder.createFolder(input.activityName);
@@ -200,8 +214,15 @@ function handleSaveMetadata(identity, payload) {
     const rows = sheet.getDataRange().getValues();
     const header = mapHeader(rows[0]);
     const key = buildActivityKey(input);
+    const existingFolderRow = findByFolderId(rows, header, payload.folderId);
+    if (existingFolderRow) {
+      const existingActivity = activityFromRow(existingFolderRow, header);
+      if (existingActivity.activityKey === key && existingActivity.activityStatus === "active") {
+        return ok({ saved: true, alreadySaved: true, uploadId: existingActivity.uploadId });
+      }
+      throw new Error("folder already has different metadata");
+    }
     if (findActiveByKey(rows, header, key)) throw new Error("activity already exists; use Search / Upload More");
-    if (findByFolderId(rows, header, payload.folderId)) throw new Error("folder already has metadata");
 
     const folder = DriveApp.getFolderById(String(payload.folderId));
     if (folder.getName() !== input.activityName) throw new Error("folder name does not match activity");
