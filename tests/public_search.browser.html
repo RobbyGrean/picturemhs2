@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<title>Public search browser tests</title>
+<body>RUNNING</body>
+<script>
+  window.ContentService = {
+    MimeType: { JSON: "application/json" },
+    createTextOutput(content) {
+      return {
+        content,
+        setMimeType() { return this; },
+        getContentText() { return this.content; }
+      };
+    }
+  };
+  window.Utilities = { formatDate: () => "2026" };
+</script>
+<script src="../starter/Code.gs"></script>
+<script>
+  try {
+    const headers = [
+      "upload_id", "activity_key", "category", "year_be", "month", "day",
+      "activity_name", "folder_path", "folder_id", "folder_url", "uploaded_by",
+      "uploaded_by_name", "file_count", "uploaded_at", "updated_at",
+      "last_uploaded_by", "activity_status", "visibility", "cover_file_id"
+    ];
+
+    function row(index, status = "active") {
+      return [
+        `upload-${index}`, `activity-${index}`, "ประชุม", 2569, 7, (index % 28) + 1,
+        status === "active" ? `ประชุมครั้งที่ ${index}` : "ห้ามเผยแพร่",
+        `private/path/${index}`, `folder-${index}`,
+        `https://drive.google.com/drive/folders/folder-${index}`,
+        `uploader${index}@example.com`, `Uploader ${index}`, index,
+        "2026-07-01T00:00:00Z", `2026-07-${String((index % 28) + 1).padStart(2, "0")}T01:00:00Z`,
+        `last${index}@example.com`, status, "public", `cover-${index}`
+      ];
+    }
+
+    const rows = [headers];
+    for (let index = 1; index <= 60; index += 1) rows.push(row(index));
+    rows.push(row(61, "inactive"));
+    const internal = row(62);
+    internal[17] = "internal";
+    internal[6] = "กิจกรรมภายใน";
+    rows.push(internal);
+    const legacy = row(63);
+    legacy[17] = "";
+    legacy[6] = "กิจกรรมเดิมก่อน migration";
+    rows.push(legacy);
+    getUploadsSheet = () => ({ getDataRange: () => ({ getValues: () => rows }) });
+
+    function get(params) {
+      return JSON.parse(doGet({ parameter: params }).getContentText());
+    }
+
+    function post(payload) {
+      return JSON.parse(doPost({ postData: { contents: JSON.stringify(payload) } }).getContentText());
+    }
+
+    function assert(condition, message) {
+      if (!condition) throw new Error(message);
+    }
+
+    const result = get({ action: "publicSearch", yearBE: "2569", month: "7", activityName: "ประชุม" });
+    const serialized = JSON.stringify(result);
+    assert(result.ok && result.results.length === 50 && result.truncated, "filtered result limit");
+    assert(!serialized.includes("@example.com"), "email leaked");
+    assert(!serialized.includes("private/path"), "folder path leaked");
+    assert(!serialized.includes("folderId"), "folder id leaked");
+    assert(!serialized.includes("coverFileId"), "raw cover field leaked");
+    assert(result.results[0].coverUrl.startsWith("https://drive.google.com/thumbnail?id=cover-"), "cover URL missing");
+    assert(!serialized.includes("ห้ามเผยแพร่"), "inactive row leaked");
+    assert(!serialized.includes("กิจกรรมภายใน"), "internal row leaked");
+
+    const empty = get({ action: "publicSearch" });
+    assert(!empty.ok && empty.error.startsWith("invalid public search:"), "public year is not mandatory");
+    const latest = get({ action: "publicLatest" });
+    assert(latest.ok && latest.results.length === 3 && latest.truncated, "latest result limit");
+    assert(!JSON.stringify(latest).includes("กิจกรรมภายใน"), "internal latest leak");
+    const legacyVisibility = get({ action: "publicSearch", yearBE: "2569", activityName: "กิจกรรมเดิมก่อน migration" });
+    assert(legacyVisibility.ok && legacyVisibility.results.length === 1, "blank legacy visibility is not public");
+    const exact = get({ action: "publicSearch", yearBE: "2569", day: "2", category: "ประชุม", activityName: "ประชุมครั้งที่ 1" });
+    assert(exact.ok && exact.results.length === 1 && exact.results[0].activityName === "ประชุมครั้งที่ 1", "day/category/exact name filter");
+    assert(!get({ action: "publicSearch", yearBE: "2569", month: "13" }).ok, "invalid month accepted");
+    assert(!get({ action: "publicSearch", yearBE: "2569", day: "32" }).ok, "invalid day accepted");
+    assert(!get({ action: "publicSearch", yearBE: "2569", activityName: "ก".repeat(101) }).ok, "long text accepted");
+    assert(get({ action: "search" }).error === "missing idToken", "protected search became public");
+    assert(get({ action: "getAllowedUsers" }).error === "missing idToken", "allowed users list became public");
+
+    ["init", "createFolder", "saveMetadata", "appendMetadata", "updateActivity", "archiveActivity", "restoreActivity", "saveAllowedUser", "setAllowedUserActive"].forEach((action) => {
+      assert(post({ action }).error === "missing idToken", `${action} became public`);
+    });
+
+    getUploadsSheet = () => { throw new Error("sensitive spreadsheet detail"); };
+    assert(get({ action: "publicSearch", yearBE: "2569" }).error === "public search unavailable", "internal error leaked");
+    document.body.textContent = "PASS: public search API and authorization regression tests";
+  } catch (error) {
+    document.body.textContent = `FAIL: ${error.message}`;
+  }
+</script>
+</html>

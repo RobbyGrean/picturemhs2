@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<title>Frontend API recovery browser tests</title>
+<body>RUNNING</body>
+<script src="../assets/js/app.js"></script>
+<script>
+(async () => {
+  try {
+    function assert(condition, message) {
+      if (!condition) throw new Error(message);
+    }
+    function response(text, status = 200) {
+      return { ok: status >= 200 && status < 300, status, text: async () => text };
+    }
+
+    const valid = await readApiJson(response('{"ok":true}'), false);
+    assert(valid.ok, "valid JSON response rejected");
+
+    let ambiguous = false;
+    try {
+      await readApiJson(response('<!DOCTYPE html><title>temporary error</title>'), true);
+    } catch (error) {
+      ambiguous = error.isAmbiguousApiResponse === true;
+    }
+    assert(ambiguous, "HTML mutation response is not marked ambiguous");
+    assert(isTransientApiError({ httpStatus: 404 }), "404 is not transient");
+    assert(isTransientApiError({ httpStatus: 503 }), "503 is not transient");
+    assert(!isTransientApiError({ httpStatus: 400 }), "400 incorrectly retried");
+
+    const requestedUrls = [];
+    window.fetch = async (url) => {
+      requestedUrls.push(String(url));
+      return requestedUrls.length === 1
+        ? response('<!DOCTYPE html><title>temporary 404</title>', 404)
+        : response('{"ok":true,"results":[]}', 200);
+    };
+    const getResult = await apiGet({ action: "search", yearBE: "2569" }, { timeoutMs: 50 });
+    assert(getResult.ok && requestedUrls.length === 2, "safe GET did not recover from 404");
+    assert(requestedUrls[0] !== requestedUrls[1], "GET retry did not cache-bust");
+
+    window.fetch = async () => response('<!DOCTYPE html><title>gateway error</title>', 200);
+    let postAmbiguous = false;
+    try {
+      await apiPost({ action: "saveMetadata" });
+    } catch (error) {
+      postAmbiguous = error.isAmbiguousApiResponse === true;
+    }
+    assert(postAmbiguous, "POST HTML response is not recoverable");
+
+    document.body.textContent = "PASS: frontend GET retry and ambiguous POST recovery";
+  } catch (error) {
+    document.body.textContent = `FAIL: ${error.message}\n${error.stack || ""}`;
+  }
+})();
+</script>
+</html>

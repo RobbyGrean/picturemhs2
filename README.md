@@ -580,6 +580,19 @@ repository/
 - [ ] ผลลัพธ์ไม่เกิน 50 รายการ
 - [ ] เปิดและดาวน์โหลดไฟล์จาก Drive โดยไม่ล็อกอินได้
 
+### Automated regression
+
+ไฟล์ทดสอบใช้ `starter/Code.gs` ซึ่งไม่มี ID/อีเมล production:
+
+```bash
+node tests/activity_management.test.js
+node tests/allowed_users.test.js
+node tests/public_search.test.js
+node tests/frontend_syntax.test.js
+```
+
+หากไม่มี Node.js ให้เปิด `tests/*.browser.html` ผ่าน browser ที่อนุญาต local file access โดย `frontend_recovery.browser.html` จำลอง 404 → 200 และ HTML response หลัง mutation โดยไม่เรียก production API
+
 ## 3.10 🔧 การดูแลระยะยาว
 
 - Backup Spreadsheet และตรวจ permission เป็นระยะ

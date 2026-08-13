@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<title>Activity management browser tests</title>
+<body>RUNNING</body>
+<script>
+window.ContentService = {
+  MimeType: { JSON: "application/json" },
+  createTextOutput(content) { return { content, setMimeType() { return this; }, getContentText() { return this.content; } }; }
+};
+let uuid = 0;
+window.Utilities = { formatDate: () => "2026", getUuid: () => `uuid-${++uuid}` };
+window.LockService = { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) };
+window.UrlFetchApp = { fetch: () => ({ getResponseCode: () => 401, getContentText: () => "{}" }) };
+
+class Folder {
+  constructor(id, name, parent = null) {
+    this.id = id; this.name = name; this.parent = parent; this.children = []; this.files = [];
+    if (parent) parent.children.push(this);
+  }
+  getId() { return this.id; }
+  getName() { return this.name; }
+  getUrl() { return `https://drive.google.com/drive/folders/${this.id}`; }
+  setName(name) { this.name = name; return this; }
+  getParents() { const values = this.parent ? [this.parent] : []; return iterator(values); }
+  getFoldersByName(name) { return iterator(this.children.filter((child) => child.name === name)); }
+  getFolders() { return iterator(this.children); }
+  getFiles() { return iterator(this.files); }
+  createFolder(name) { const child = new Folder(`folder-${++Folder.nextId}`, name, this); folders[child.id] = child; return child; }
+  moveTo(parent) {
+    if (this.parent) this.parent.children = this.parent.children.filter((child) => child !== this);
+    this.parent = parent;
+    parent.children.push(this);
+    return this;
+  }
+}
+Folder.nextId = 0;
+function iterator(values) { let index = 0; return { hasNext: () => index < values.length, next: () => values[index++] }; }
+const folders = {};
+const driveFiles = {};
+const root = new Folder("root", "root");
+folders.root = root;
+class DriveFile {
+  constructor(id, mimeType, parent) { this.id = id; this.mimeType = mimeType; this.parent = parent; }
+  getId() { return this.id; }
+  getMimeType() { return this.mimeType; }
+  getParents() { return iterator(this.parent ? [this.parent] : []); }
+}
+window.DriveApp = {
+  getFolderById(id) { if (!folders[id]) throw new Error("folder not found"); return folders[id]; },
+  getFileById(id) { if (!driveFiles[id]) throw new Error("file not found"); return driveFiles[id]; }
+};
+</script>
+<script src="../starter/Code.gs"></script>
+<script>
+try {
+  getCurrentYearBE = () => 2569;
+  folders[CONFIG.ROOT_FOLDER_ID] = root;
+  ensureAllowed = () => true;
+  ensureUploadsHeader = () => {};
+  ensureAuditHeader = () => {};
+
+  const headers = UPLOAD_HEADERS.slice();
+  const rows = [headers];
+  let failNextWrite = false;
+  const uploadsSheet = {
+    getLastRow: () => rows.length,
+    getLastColumn: () => headers.length,
+    getDataRange: () => ({ getValues: () => rows.map((row) => row.slice()) }),
+    appendRow: (row) => rows.push(row.slice()),
+    getRange(row, column, numRows = 1, numColumns = 1) {
+      return {
+        getValue: () => rows[row - 1][column - 1],
+        getValues: () => Array.from({ length: numRows }, (_, r) => rows[row - 1 + r].slice(column - 1, column - 1 + numColumns)),
+        setValue(value) { rows[row - 1][column - 1] = value; return this; },
+        setValues(values) {
+          if (failNextWrite && row > 1) { failNextWrite = false; throw new Error("forced metadata failure"); }
+          values.forEach((source, r) => source.forEach((value, c) => { rows[row - 1 + r][column - 1 + c] = value; }));
+          return this;
+        }
+      };
+    },
+    setFrozenRows() {}
+  };
+  const auditRows = [AUDIT_HEADERS.slice()];
+  const auditSheet = { getLastRow: () => auditRows.length, appendRow: (row) => auditRows.push(row.slice()), setFrozenRows() {} };
+  getUploadsSheet = () => uploadsSheet;
+  getActivityAuditSheet = () => auditSheet;
+
+  function assert(condition, message) { if (!condition) throw new Error(message); }
+  function throwsMessage(callback, part) {
+    try { callback(); } catch (error) { return String(error.message).includes(part); }
+    return false;
+  }
+  function json(output) { return JSON.parse(output.getContentText()); }
+  function input(category, yearBE, month, day, activityName, visibility = "public") {
+    return { category, yearBE, month, day, activityName, visibility };
+  }
+  function folderFor(data) {
+    const dayFolder = resolveDayFolder(data).dayFolder;
+    const folder = dayFolder.createFolder(data.activityName);
+    folder.files.push("photo-a", "photo-b");
+    return folder;
+  }
+  function addActivity(index, owner, data, status = "active", visibility = "public") {
+    const folder = folderFor(data);
+    const now = "2026-07-16T00:00:00.000Z";
+    rows.push([
+      `upload-${index}`, buildActivityKey(data), data.category, data.yearBE, data.month, data.day,
+      data.activityName, buildFolderPath(data), folder.id, folder.getUrl(), owner, `Owner ${index}`,
+      folder.files.length, now, now, owner, status, visibility
+    ]);
+    return { folder, uploadId: `upload-${index}` };
+  }
+
+  const owner = { email: "activity-owner@example.com", name: "Owner" };
+  const appender = { email: "appender@example.com", name: "Appender" };
+  const admin = { email: CONFIG.ADMIN_EMAILS[0], name: "Admin" };
+
+  assert(isEditableYear(2569) && isEditableYear(2568) && isEditableYear(2567), "editable three-year window");
+  assert(buildDriveThumbnailUrl("cover id").includes("cover%20id") && buildDriveThumbnailUrl("none") === "", "thumbnail URL normalization failed");
+  [2567, 2568, 2569].forEach((year) => assert(validateActivityInput(input("ประชุม", year, 1, 1, `mutable-${year}`)).yearBE === year, `${year} is not mutable`));
+  assert(!isEditableYear(2570) && !isEditableYear(2566), "future/old year accepted");
+  assert(throwsMessage(() => validateActivityInput(input("ประชุม", 2570, 1, 1, "future")), "read-only"), "future create accepted");
+  assert(throwsMessage(() => validateActivityInput(input("ประชุม", 2566, 1, 1, "old")), "read-only"), "old create accepted");
+
+  const firstData = input("ประชุม", 2569, 7, 1, "กิจกรรมเจ้าของ");
+  const first = addActivity(1, owner.email, firstData);
+  const firstOldParent = first.folder.parent;
+  const firstId = first.folder.id;
+  const firstUrl = first.folder.getUrl();
+  const firstFiles = first.folder.files.slice();
+  const moved = json(handleUpdateActivity(owner, Object.assign({ uploadId: first.uploadId, folderId: firstId }, input("ไปราชการ", 2569, 7, 2, "กิจกรรมแก้ไข", "public"))));
+  assert(moved.ok && moved.updated, "owner cannot edit/move");
+  assert(first.folder.id === firstId && first.folder.getUrl() === firstUrl, "move changed folder ID/URL");
+  assert(JSON.stringify(first.folder.files) === JSON.stringify(firstFiles), "move changed files");
+  assert(first.folder.name === "กิจกรรมแก้ไข", "Drive rename failed");
+  assert(firstOldParent.parent.children.includes(firstOldParent), "empty old parent was deleted");
+  assert(rows[1][headers.indexOf("category")] === "ไปราชการ" && rows[1][headers.indexOf("day")] === 2, "metadata move failed");
+
+  rows[1][headers.indexOf("last_uploaded_by")] = appender.email;
+  const spoofPayload = Object.assign({ uploadId: first.uploadId, folderId: firstId, uploadedBy: owner.email }, input("ประชุม", 2569, 7, 3, "ขโมยสิทธิ์"));
+  assert(throwsMessage(() => handleUpdateActivity(appender, spoofPayload), "owner or admin"), "frontend owner spoof bypassed authorization");
+  assert(throwsMessage(() => handleArchiveActivity(appender, { uploadId: first.uploadId, folderId: firstId }), "owner or admin"), "non-owner archived activity");
+
+  const adminEdit = json(handleUpdateActivity(admin, Object.assign({ uploadId: first.uploadId, folderId: firstId }, input("ไปราชการ", 2569, 7, 2, "Admin แก้ไข", "internal"))));
+  assert(adminEdit.ok && rows[1][headers.indexOf("visibility")] === "internal", "admin cannot edit visibility");
+  const authenticatedInternal = json(handleSearch(owner, { yearBE: "2569" }));
+  assert(authenticatedInternal.results.some((item) => item.uploadId === first.uploadId), "internal missing from authenticated search");
+  const publicInternal = json(handlePublicSearch({ yearBE: "2569" }));
+  assert(!publicInternal.results.some((item) => item.activityName === "Admin แก้ไข"), "internal leaked to public search");
+  const latestInternal = json(handlePublicLatest());
+  assert(!latestInternal.results.some((item) => item.activityName === "Admin แก้ไข"), "internal leaked to latest");
+
+  const oldData = input("ประชุม", 2566, 1, 1, "ข้อมูลเก่า");
+  const old = addActivity(2, owner.email, oldData);
+  const oldSearch = json(handleSearch(owner, { yearBE: "2566" }));
+  assert(oldSearch.results.length === 1 && oldSearch.results[0].isReadOnly && !oldSearch.results[0].canAppend, "old record not searchable/read-only");
+  assert(oldSearch.results[0].folderUrl === old.folder.getUrl(), "old Drive link missing");
+  assert(throwsMessage(() => handleSearch(owner, {}), "yearBE is required"), "authenticated search allows no year");
+  assert(throwsMessage(() => handleAppendMetadata(owner, { folderId: old.folder.id, fileCountDelta: 1 }), "read-only"), "old activity accepted append");
+
+  const newData = input("กิจกรรมและอื่นๆ", 2569, 11, 11, "กิจกรรมใหม่");
+  const created = json(handleCreateFolder(owner, newData));
+  assert(created.ok && folders[created.folderId], "new folder creation regression");
+  const repeatedCreate = json(handleCreateFolder(owner, newData));
+  assert(repeatedCreate.ok && repeatedCreate.reusedPendingFolder && repeatedCreate.folderId === created.folderId, "pending empty folder is not recoverable");
+  const coverFile = new DriveFile("cover-new", "image/jpeg", folders[created.folderId]);
+  driveFiles[coverFile.id] = coverFile;
+  folders[created.folderId].files.push(coverFile);
+  const savePayload = Object.assign({}, newData, {
+    folderId: created.folderId, folderUrl: created.folderUrl, folderPath: created.folderPath, fileCount: 2, coverFileId: coverFile.id
+  });
+  const saved = json(handleSaveMetadata(owner, savePayload));
+  assert(saved.ok && rows[rows.length - 1][headers.indexOf("visibility")] === "public", "new upload does not default public");
+  const rowCountAfterSave = rows.length;
+  const repeatedSave = json(handleSaveMetadata(owner, savePayload));
+  assert(repeatedSave.ok && repeatedSave.alreadySaved && rows.length === rowCountAfterSave, "saveMetadata retry created a duplicate");
+  assert(rows[rows.length - 1][headers.indexOf("cover_file_id")] === coverFile.id, "cover file ID not saved");
+  const savedSearch = json(handleSearch(owner, { yearBE: "2569", activityName: newData.activityName }));
+  assert(savedSearch.results[0].coverUrl.includes("cover-new") && !("coverFileId" in savedSearch.results[0]), "authenticated cover response is unsafe");
+  json(handleAppendMetadata(appender, { folderId: created.folderId, fileCountDelta: 1 }));
+  assert(rows[rows.length - 1][headers.indexOf("file_count")] === 3, "in-window append regression");
+  const outsideCover = new DriveFile("outside-cover", "image/png", root);
+  driveFiles[outsideCover.id] = outsideCover;
+  assert(throwsMessage(() => validateCoverFile(outsideCover.id, created.folderId), "outside"), "outside cover accepted");
+
+  for (let index = 20; index < 72; index += 1) addActivity(index, owner.email, input("ประชุม", 2568, 1, (index % 28) + 1, `ผลค้นหา ${index}`));
+  const limitedSearch = json(handleSearch(owner, { yearBE: "2568" }));
+  assert(limitedSearch.results.length === 50 && limitedSearch.truncated, "authenticated search limit/truncation failed");
+
+  const duplicateCount = rows.length;
+  assert(throwsMessage(() => handleCreateFolder(owner, input("ไปราชการ", 2569, 7, 2, "Admin แก้ไข")), "already exists"), "duplicate create accepted");
+  assert(rows.length === duplicateCount, "duplicate create added metadata row");
+
+  const collisionData = input("ประชุม", 2569, 8, 8, "ชื่อซ้ำ");
+  addActivity(3, "other@example.com", collisionData);
+  addActivity(4, "other@example.com", input("ประชุม", 2569, 8, 8, "ชื่อซ้ำ (1)"));
+  const collision = json(handleUpdateActivity(owner, Object.assign({ uploadId: first.uploadId, folderId: firstId }, collisionData)));
+  assert(collision.ok && collision.collisionRenamed && collision.activity.activityName === "ชื่อซ้ำ (2)", "collision suffix sequence failed");
+  assert(first.folder.name === "ชื่อซ้ำ (2)" && collision.activity.activityKey.endsWith("ชื่อซ้ำ (2)") && collision.activity.folderPath.endsWith("ชื่อซ้ำ (2)"), "collision name/key/path inconsistent");
+
+  const rollbackData = input("กิจกรรมและอื่นๆ", 2569, 9, 9, "ก่อน rollback");
+  const rollback = addActivity(5, owner.email, rollbackData);
+  const oldParent = rollback.folder.parent;
+  const oldRollbackName = rollback.folder.name;
+  failNextWrite = true;
+  assert(throwsMessage(() => handleUpdateActivity(owner, Object.assign({ uploadId: rollback.uploadId, folderId: rollback.folder.id }, input("ประชุม", 2569, 10, 10, "หลัง rollback"))), "rollback attempted"), "metadata failure not controlled");
+  assert(rollback.folder.parent === oldParent && rollback.folder.name === oldRollbackName, "Drive rollback failed");
+  const rollbackRecordAfter = loadActivityRecord(uploadsSheet, rollback.uploadId, rollback.folder.id);
+  assert(rollbackRecordAfter.activity.activityName !== "หลัง rollback", "failed move changed metadata");
+  assert(auditRows.some((row) => row[3] === "failed_move"), "failed move audit missing");
+
+  const driveBeforeArchive = { id: first.folder.id, parent: first.folder.parent, name: first.folder.name, files: first.folder.files.slice() };
+  assert(json(handleArchiveActivity(owner, { uploadId: first.uploadId, folderId: firstId })).archived, "owner cannot archive");
+  assert(first.folder.id === driveBeforeArchive.id && first.folder.parent === driveBeforeArchive.parent && first.folder.name === driveBeforeArchive.name && JSON.stringify(first.folder.files) === JSON.stringify(driveBeforeArchive.files), "archive changed Drive");
+  assert(!json(handleSearch(owner, { yearBE: "2569" })).results.some((item) => item.uploadId === first.uploadId), "archived visible in normal search");
+  assert(!json(handlePublicLatest()).results.some((item) => item.activityName === first.folder.name), "archived visible publicly");
+  assert(throwsMessage(() => handleRestoreActivity(owner, { uploadId: first.uploadId, folderId: firstId }), "admin access"), "non-admin restored activity");
+  assert(json(handleRestoreActivity(admin, { uploadId: first.uploadId, folderId: firstId })).restored, "admin cannot restore");
+  assert(json(handleArchiveActivity(admin, { uploadId: "upload-3", folderId: rows.find((row) => row[0] === "upload-3")[8] })).archived, "admin cannot archive another owner activity");
+
+  const protectedActions = ["init", "createFolder", "saveMetadata", "appendMetadata", "updateActivity", "archiveActivity", "restoreActivity"];
+  protectedActions.forEach((action) => {
+    const result = json(doPost({ postData: { contents: JSON.stringify({ action }) } }));
+    assert(!result.ok && result.error === "missing idToken", `${action} lost authentication`);
+  });
+  const invalidToken = json(doPost({ postData: { contents: JSON.stringify({ action: "init", idToken: "invalid" }) } }));
+  assert(!invalidToken.ok && invalidToken.error === "invalid google identity", "invalid ID token accepted");
+  assert(auditRows.some((row) => row[3] === "move") && auditRows.some((row) => row[3] === "archive") && auditRows.some((row) => row[3] === "restore"), "audit lifecycle incomplete");
+
+  document.body.textContent = "PASS: authorization, year window, duplicate/collision, move/rollback, visibility, soft delete, regression";
+} catch (error) {
+  document.body.textContent = `FAIL: ${error.message}\n${error.stack || ""}`;
+}
+</script>
+</html>

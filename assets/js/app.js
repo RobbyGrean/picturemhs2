@@ -1039,12 +1039,35 @@ async function getFreshIdToken() {
   return state.idToken;
 }
 
-async function apiGet(params) {
-  const query = new URLSearchParams(Object.assign({ _ts: Date.now() }, params)).toString();
-  const response = await fetch(`${CONFIG.APPS_SCRIPT_URL}?${query}`, { cache: "no-store" });
-  const data = await readApiJson(response, false);
-  if (!data.ok) throw new Error(data.error || "เกิดข้อผิดพลาดจากระบบ");
-  return data;
+async function apiGet(params, options = {}) {
+  const timeoutMs = Number(options.timeoutMs || 15000);
+  const attempts = options.retry === false ? 1 : 2;
+  let lastError;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    const query = new URLSearchParams(Object.assign({ _ts: Date.now(), _attempt: attempt }, params)).toString();
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), attempt ? 30000 : timeoutMs);
+    try {
+      const response = await fetch(`${CONFIG.APPS_SCRIPT_URL}?${query}`, {
+        cache: "no-store",
+        signal: controller.signal
+      });
+      const data = await readApiJson(response, false);
+      if (!response.ok) {
+        const httpError = new Error(data.error || `Apps Script ตอบกลับผิดปกติ (${response.status})`);
+        httpError.httpStatus = response.status;
+        throw httpError;
+      }
+      if (!data.ok) throw new Error(data.error || "เกิดข้อผิดพลาดจากระบบ");
+      return data;
+    } catch (error) {
+      lastError = error;
+      if (attempt + 1 >= attempts || !isTransientApiError(error)) throw error;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  throw lastError;
 }
 
 async function apiPost(body) {
@@ -1088,6 +1111,13 @@ async function readApiJson(response, mutationMayHaveCompleted) {
   }
 }
 
+function isTransientApiError(error) {
+  if (!error) return false;
+  const status = Number(error.httpStatus || 0);
+  return error.name === "AbortError" || error instanceof TypeError ||
+    status === 404 || status === 408 || status === 429 || status >= 500;
+}
+
 async function confirmActivityMetadata(folderId, activity, minimumFileCount) {
   const delays = [0, 1500, 3000, 5000];
   for (const delay of delays) {
@@ -1101,7 +1131,7 @@ async function confirmActivityMetadata(folderId, activity, minimumFileCount) {
         month: activity.month,
         day: activity.day,
         activityName: activity.activityName
-      });
+      }, { timeoutMs: 8000, retry: false });
       const match = (result.results || []).find((item) => String(item.folderId) === String(folderId));
       if (match && Number(match.fileCount || 0) >= Number(minimumFileCount || 0)) return true;
     } catch (error) {

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<title>Allowed users browser tests</title>
+<body>RUNNING</body>
+<script>
+  window.ContentService = {
+    MimeType: { JSON: "application/json" },
+    createTextOutput(content) {
+      return {
+        content,
+        setMimeType() { return this; },
+        getContentText() { return this.content; }
+      };
+    }
+  };
+  window.LockService = {
+    getScriptLock() {
+      return { waitLock() {}, releaseLock() {} };
+    }
+  };
+</script>
+<script src="../starter/Code.gs"></script>
+<script>
+  try {
+    const rows = [
+      ["email", "display_name", "is_active", "notes"],
+      [CONFIG.ADMIN_EMAILS[0], "Owner Admin", true, "system owner"],
+      [CONFIG.ADMIN_EMAILS[1], "Backup Admin", true, "backup admin"]
+    ];
+
+    const sheet = {
+      getLastRow: () => rows.length,
+      getDataRange: () => ({ getValues: () => rows.map((row) => row.slice()) }),
+      appendRow: (row) => rows.push(row.slice()),
+      getRange: (row, column) => ({ setValue: (value) => { rows[row - 1][column - 1] = value; } }),
+      setFrozenRows() {}
+    };
+    getAllowedUsersSheet = () => sheet;
+
+    function json(output) {
+      return JSON.parse(output.getContentText());
+    }
+
+    function assert(condition, message) {
+      if (!condition) throw new Error(message);
+    }
+
+    function throwsMessage(callback, expected) {
+      try {
+        callback();
+      } catch (error) {
+        return error.message === expected;
+      }
+      return false;
+    }
+
+    const admin = { email: CONFIG.ADMIN_EMAILS[0] };
+    const uploader = { email: "uploader@example.com" };
+
+    const initial = json(handleGetAllowedUsers(admin));
+    assert(initial.ok && initial.users.length === 2, "admin cannot list users");
+    assert(initial.users.every((user) => user.role === "admin"), "admin role mapping");
+    assert(throwsMessage(() => handleGetAllowedUsers(uploader), "admin access required"), "uploader can list users");
+
+    const created = json(handleSaveAllowedUser(admin, {
+      email: "New.User@Example.com ",
+      displayName: "New Uploader",
+      notes: "communications"
+    }));
+    assert(created.ok && created.role === "uploader", "new user is not uploader");
+    assert(rows.length === 4, "new user row not appended");
+    assert(rows[3][0] === "new.user@example.com" && rows[3][2] === true, "new user normalization/default active");
+
+    handleSaveAllowedUser(admin, {
+      email: "new.user@example.com",
+      displayName: "Updated Name",
+      notes: "updated notes"
+    });
+    assert(rows.length === 4, "duplicate user appended");
+    assert(rows[3][1] === "Updated Name" && rows[3][3] === "updated notes", "user details not updated");
+
+    handleSetAllowedUserActive(admin, { email: "new.user@example.com", isActive: false });
+    assert(rows[3][2] === false, "uploader not deactivated");
+    assert(throwsMessage(() => ensureAllowed("new.user@example.com"), "email is not allowed"), "inactive uploader remains allowed");
+
+    handleSetAllowedUserActive(admin, { email: "new.user@example.com", isActive: true });
+    assert(ensureAllowed("new.user@example.com") === true, "uploader not reactivated");
+    assert(throwsMessage(() => handleSaveAllowedUser(uploader, {
+      email: "other@example.com", displayName: "Other", notes: ""
+    }), "admin access required"), "uploader can save users");
+    assert(throwsMessage(() => handleSetAllowedUserActive(admin, {
+      email: CONFIG.ADMIN_EMAILS[0], isActive: false
+    }), "admin cannot be deactivated"), "admin can be deactivated");
+
+    document.body.textContent = "PASS: allowed users admin authorization and lifecycle tests";
+  } catch (error) {
+    document.body.textContent = `FAIL: ${error.message}`;
+  }
+</script>
+</html>
