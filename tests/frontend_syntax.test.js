@@ -44,10 +44,14 @@ assert.match(sources[path.join("public", "index.html")], /id="yearBE"[^>]*requir
 assert.match(sources[path.join("public", "index.html")], /\.\.\/assets\/covers\//);
 assert.match(sources[path.join("public", "index.html")], /item\.coverUrl/);
 assert.match(sources[path.join("public", "index.html")], /id="retryLatestButton"/);
-assert.match(sources[path.join("public", "index.html")], /LATEST_RETRY_TIMEOUT_MS:\s*30000/);
+assert.match(sources[path.join("public", "index.html")], /LATEST_RETRY_TIMEOUT_MS:\s*12000/);
 assert.match(sources[path.join("public", "index.html")], /isTransientFetchError/);
 assert.match(sources[path.join("public", "index.html")], /fetchJsonWithRetry/);
 assert.match(sources[path.join("public", "index.html")], /status === 404/);
+assert.match(sources[path.join("public", "index.html")], /LATEST_DISPLAY_LIMIT:\s*3/);
+assert.match(sources[path.join("public", "index.html")], /BACKGROUND_RETRY_MS:\s*60000/);
+assert.match(sources[path.join("public", "index.html")], /action=publicSearch&yearBE=/);
+assert.match(sources[path.join("public", "index.html")], /\.slice\(0, CONFIG\.LATEST_DISPLAY_LIMIT\)/);
 
 ["activity.svg", "travel.svg", "meeting.svg"].forEach((file) => {
   const svg = fs.readFileSync(path.join(__dirname, "..", "assets", "covers", file), "utf8");
